@@ -12,7 +12,9 @@
     "lint:clj": "clj-kondo --config .clj-kondo.config.edn --lint src",
     "lint:clj:lint-staged": "clj-kondo --config .clj-kondo.config.edn --lint",
     "lint:js": "eslint '**/*.{ts,js}'",
-    "tsc:type-check": "./bin/type-check.sh"
+    "tsc:type-check": "./bin/type-check.sh",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "husky": {
     "hooks": {
@@ -33,7 +35,8 @@
   "dependencies": {
     "chai": "4.2.0",
     "cypress": "4.5.0",
-    "fp-ts": "2.5.4"
+    "fp-ts": "2.5.4",
+    "snyk": "^1.319.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "2.30.0",
@@ -59,5 +62,6 @@
     "prettier": "2.0.5",
     "puppeteer": "3.0.2",
     "typescript": "3.8.3"
-  }
+  },
+  "snyk": true
 }
