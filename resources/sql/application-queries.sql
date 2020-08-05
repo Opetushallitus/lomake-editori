@@ -386,17 +386,18 @@ SELECT
   f.key     AS form_key
 FROM applications AS a
 JOIN forms AS f ON a.form_id = f.id
-JOIN application_secrets AS las ON las.application_key = a.key
-WHERE las.secret = :secret AND
-      las.created_time > now() - INTERVAL '1 day' * :secret_link_valid_days AND
-      NOT EXISTS (SELECT 1
-                  FROM applications AS a2
-                  WHERE a2.key = a.key AND
-                        a2.id > a.id) AND
-      NOT EXISTS (SELECT 1
-                  FROM application_secrets AS las2
-                  WHERE las2.application_key = las.application_key AND
-                        las2.id > las.id);
+JOIN application_secrets AS ass
+  ON ass.application_key = a.key
+LEFT JOIN applications AS la
+  ON la.key = a.key AND
+     la.id > a.id
+LEFT JOIN application_secrets AS lass
+  ON lass.application_key = ass.application_key AND
+     lass.id > ass.id
+WHERE la.id IS NULL AND
+      lass.id IS NULL AND
+      ass.secret = :secret AND
+      ass.created_time > now() - INTERVAL '1 day' * :secret_link_valid_days;
 
 -- name: yesql-get-latest-application-by-virkailija-secret
 SELECT
@@ -410,10 +411,14 @@ SELECT
   a.haku,
   a.hakukohde,
   f.key     AS form_key
-FROM latest_applications AS a
+FROM applications AS a
 JOIN forms f ON a.form_id = f.id
 JOIN virkailija_update_secrets AS vus ON vus.application_key = a.key
-WHERE vus.secret = :virkailija_secret;
+LEFT JOIN applications AS la
+  ON la.key = a.key AND
+     la.id > a.id
+WHERE la.id IS NULL AND
+      vus.secret = :virkailija_secret;
 
 -- name: yesql-get-latest-application-by-virkailija-rewrite-secret
 SELECT
@@ -426,10 +431,14 @@ SELECT
   a.haku,
   a.hakukohde,
   f.key     AS form_key
-FROM latest_applications AS a
+FROM applications AS a
 JOIN forms f ON a.form_id = f.id
 JOIN virkailija_rewrite_secrets AS vus ON vus.application_key = a.key
-WHERE vus.secret = :virkailija_secret;
+LEFT JOIN applications AS la
+  ON la.key = a.key AND
+     la.id > a.id
+WHERE la.id IS NULL AND
+      vus.secret = :virkailija_secret;
 
 -- name: yesql-get-latest-version-by-secret-lock-for-update
 WITH application_secret AS (SELECT
