@@ -8,6 +8,7 @@
             [ataru.cache.two-layer-cache :as two-layer-cache]
             [ataru.http.server :as server]
             [ataru.hakija.hakija-form-service :as hakija-form-service]
+            [ataru.hakukohderyhmapalvelu-service.hakukohderyhmapalvelu-service :as hakukohderyhma-service]
             [ataru.kayttooikeus-service.kayttooikeus-service :as kayttooikeus-service]
             [ataru.organization-service.organization-service :as organization-service]
             [ataru.valintalaskentakoostepalvelu.valintalaskentakoostepalvelu-client :as koostepalvelu-client]
@@ -46,6 +47,15 @@
     component/system-map
 
     :audit-logger audit-logger
+
+    :hakukohderyhmapalvelu-cas-client (cas/new-client "/hakukohderyhmapalvelu"
+                                                      "auth/cas"
+                                                      "ring-session"
+                                                      (-> config :public-config :virkailija-caller-id))
+
+    :hakukohderyhmapalvelu-service (component/using
+                                     (hakukohderyhma-service/new-hakukohderyhmapalvelu-service)
+                                     [:hakukohderyhmapalvelu-cas-client])
 
     :organization-service (component/using
                            (organization-service/new-organization-service)

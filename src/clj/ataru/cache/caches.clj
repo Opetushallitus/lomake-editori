@@ -54,8 +54,9 @@
    [:kouta-hakukohde-cache-loader
     (component/using
      (kouta-client/map->HakukohdeCacheLoader {})
-     {:cas-client           :kouta-internal-cas-client
-      :organization-service :organization-service})]
+     {:cas-client                    :kouta-internal-cas-client
+      :organization-service          :organization-service
+      :hakukohderyhmapalvelu-service :hakukohderyhmapalvelu-service})]
    [:hakukohde-union-cache-loader
     (component/using
      (union-cache/map->CacheLoader
