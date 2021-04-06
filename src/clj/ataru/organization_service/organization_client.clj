@@ -18,7 +18,9 @@
 (defn- group->map [group] {:name            (:nimi group)
                            :oid             (:oid group)
                            :type            :group
-                           :hakukohderyhma? (contains? (set (:ryhmatyypit group)) "hakukohde")
+                           :hakukohderyhma? (-> (set (:ryhmatyypit group))
+                                                (some ["hakukohde" "hakukohderyhma"])
+                                                string?)
                            :active?         (= "AKTIIVINEN" (:status group))})
 
 (defn get-all-organizations-as-seq
