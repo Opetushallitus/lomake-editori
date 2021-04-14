@@ -62,8 +62,11 @@
     (execute-with-connection conn yesql-query-fn params)
     (execute-with-db :db yesql-query-fn params)))
 
-(defn get-all-forms []
-  (execute yesql-get-forms {}))
+(defn get-all-forms
+  ([]
+   (get-all-forms nil))
+  ([hakukohderyhma-oid]
+   (execute yesql-get-forms {:hakukohderyhma_oid hakukohderyhma-oid})))
 
 (defn get-organization-oid-by-key [key]
   (:organization-oid (first (execute yesql-get-latest-version-organization-by-key {:key key}))))

@@ -16,8 +16,10 @@ JOIN LATERAL (SELECT *
               WHERE key = k.key
               ORDER BY id DESC
               LIMIT 1) AS f ON true
-WHERE f.deleted IS NULL OR
-      NOT f.deleted
+WHERE (f.deleted IS NULL OR NOT f.deleted)
+  AND :hakukohderyhma_oid::varchar IS NULL
+  OR f.content->'content' @>
+    jsonb_build_array(jsonb_build_object('belongs-to-hakukohderyhma', jsonb_build_array(:hakukohderyhma_oid::varchar)))
 ORDER BY f.created_time DESC;
 
 -- name: yesql-add-form<!

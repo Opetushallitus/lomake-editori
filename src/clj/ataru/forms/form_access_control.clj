@@ -135,13 +135,13 @@
             audit-logger))))))
 
 (defn- get-forms-as-ordinary-user
-  [tarjonta-service authorized-organization-oids]
+  [tarjonta-service authorized-organization-oids hakukohderyhma-oid]
   (filter (fn [form]
             (or (contains? authorized-organization-oids (:organization-oid form))
                 (form-allowed-by-haku? tarjonta-service authorized-organization-oids (:key form))))
-          (form-store/get-all-forms)))
+          (form-store/get-all-forms hakukohderyhma-oid)))
 
-(defn get-forms-for-editor [session tarjonta-service organization-service]
+(defn get-forms-for-editor [session tarjonta-service organization-service hakukohderyhma-oid]
   {:forms (session-orgs/run-org-authorized
            session
            organization-service
@@ -149,10 +149,10 @@
            (fn [] [])
            (fn [org-oids]
              (map #(dissoc % :organization-oid)
-                  (get-forms-as-ordinary-user tarjonta-service org-oids)))
+                  (get-forms-as-ordinary-user tarjonta-service org-oids hakukohderyhma-oid)))
            (fn []
              (map #(dissoc % :organization-oid)
-                  (form-store/get-all-forms))))})
+                  (form-store/get-all-forms hakukohderyhma-oid))))})
 
 (defn update-form-lock [form-id operation session tarjonta-service organization-service audit-logger]
   (let [latest-version  (form-store/fetch-form form-id)

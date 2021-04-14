@@ -220,10 +220,13 @@
     (api/GET "/forms" {session :session}
       :summary "Return forms for editor view. Also used by external services.
                              In practice this is Tarjonta system only for now.
-                             Return forms authorized with editor right (:form-edit)"
+                             Return forms authorized with editor right (:form-edit).
+                             If parameter hakukohderyhma-oid is supplied returns
+                             only forms using that hakukohderyhma."
+      :query-params [{hakukohderyhma-oid :- s/Str nil}]
       :return {:forms [form-schema/Form]}
-      (ok (access-controlled-form/get-forms-for-editor session tarjonta-service organization-service)))
-
+      (ok
+        (access-controlled-form/get-forms-for-editor session tarjonta-service organization-service hakukohderyhma-oid)))
 
     (api/GET "/forms/latest/:key" []
       :path-params [key :- s/Str]
