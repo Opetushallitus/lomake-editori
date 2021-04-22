@@ -13,8 +13,7 @@
             [ring.util.http-response :refer [ok]]
             [ring.util.response :as resp]
             [taoensso.timbre :as log]
-            [yesql.core :as sql])
-  (:import (fi.vm.sade.utils.cas CasLogout)))
+            [yesql.core :as sql]))
 
 (declare yesql-upsert-virkailija<!)
 
@@ -104,7 +103,7 @@
 
 (defn cas-initiated-logout [logout-request session-store]
   (log/info "cas-initiated logout")
-  (let [ticket (CasLogout/parseTicketFromLogoutRequest logout-request)]
+  (let [ticket (.parseTicketFromLogoutRequest logout-request)]
     (log/info "logging out ticket" ticket)
     (if (.isEmpty ticket)
       (log/error "Could not parse ticket from CAS request" logout-request)

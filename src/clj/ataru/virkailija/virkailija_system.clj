@@ -161,7 +161,8 @@
                      (person-service/new-person-service)
                      [:henkilo-cache :oppijanumerorekisteri-cas-client])
 
-    :login-cas-client (cas/new-cas-client (-> config :public-config :virkailija-caller-id))
+    ;TODO service securitysuffix
+    :login-cas-client (cas/new-cas-client nil nil "ring-session" (-> config :public-config :virkailija-caller-id))
 
     :liiteri-cas-client (cas/new-client "/liiteri" "/liiteri/auth/cas"
                                         "ring-session" (-> config :public-config :virkailija-caller-id))
