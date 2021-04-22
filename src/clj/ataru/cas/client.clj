@@ -47,16 +47,13 @@
   (let [cas-client (:client client)
         session-cookie-name (:session-cookie-name client)
         cas-session-id (:session-id client)
-        ;TODO request!!!
-        ;request (ok-http/request client (merge {:url url :method method}
-        ;                                       (opts-fn)
-        ;                                       (create-params session-cookie-name cas-session-id body)))
+        request (ok-http/request cas-client (merge {:url url :method method}
+                                           (opts-fn)
+                                           (create-params session-cookie-name cas-session-id body)))
         ]
     (log/error "CALLING CAS CLIENT WITH PARAMETERS: " session-cookie-name cas-session-id url)
     (when (nil? @cas-session-id)
-      (reset! cas-session-id (try (.run (.call cas-client (merge {:url url :method method}
-                                                                 (opts-fn)
-                                                                 (create-params session-cookie-name cas-session-id body))))
+      (reset! cas-session-id (try (.run (.call cas-client request))
                                (catch Exception e (log/error "----" e))) ))
     (let [resp (http-util/do-request (merge {:url url :method method}
                                             (opts-fn)
@@ -64,9 +61,7 @@
       (if (or (= 401 (:status resp))
               (= 302 (:status resp)))
         (do
-          (reset! cas-session-id (.run (.call cas-client (merge {:url url :method method}
-                                                                (opts-fn)
-                                                                (create-params session-cookie-name cas-session-id body)))))
+          (reset! cas-session-id (.run (.call cas-client request)))
           (http-util/do-request (merge {:url url :method method}
                                        (opts-fn)
                                        (create-params session-cookie-name cas-session-id body))))
