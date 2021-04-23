@@ -3,10 +3,12 @@
             [ataru.config.core :refer [config]]
             [ataru.util.http-util :as http-util]
             [cheshire.core :as json]
-            [clj-okhttp.core :as ok-http]
             [java-time :as t]
             [taoensso.timbre :as log])
-  (:import [fi.vm.sade.javautils.cas CasHttpClient]))
+  (:import [fi.vm.sade.javautils.cas CasHttpClient]
+           [okhttp3 OkHttpClient Request$Builder]
+           )
+  )
 
 (def opts {:read-timeout 1000})
 
@@ -14,12 +16,12 @@
 
 (defn new-cas-client [service security-uri-suffix session-cookie-name caller-id]
   (new CasHttpClient
-       (ok-http/create-client opts)
+       (OkHttpClient.)
        caller-id
        session-cookie-name
        service
-       security-uri-suffix
        (resolve-url :cas-client)
+       security-uri-suffix
        (get-in config [:cas :username])
        (get-in config [:cas :password])
        (t/duration 30 :minutes)))
@@ -43,18 +45,29 @@
           (some? body) (request-with-json-body body)))
 
 (defn- cas-http [client method url opts-fn & [body]]
-  (log/info "calling cas-http")
+  (log/info "CREATING REQUEST...")
   (let [cas-client (:client client)
         session-cookie-name (:session-cookie-name client)
         cas-session-id (:session-id client)
-        request (ok-http/request cas-client (merge {:url url :method method}
-                                           (opts-fn)
-                                           (create-params session-cookie-name cas-session-id body)))
+        request (case method
+                  :get (-> (Request$Builder.)
+                           (.url url)
+                           (.build)
+                           )
+                  :post (-> (Request$Builder.)
+                            (.url url)
+                            (.post body)
+                            (.build))
+                  :delete (-> (Request$Builder.)
+                              (.url url)
+                              (.delete)
+                              (.build)))
         ]
+    (log/info "REQUEST CREATED!" request)
     (log/error "CALLING CAS CLIENT WITH PARAMETERS: " session-cookie-name cas-session-id url)
     (when (nil? @cas-session-id)
       (reset! cas-session-id (try (.run (.call cas-client request))
-                               (catch Exception e (log/error "----" e))) ))
+                                  (catch Exception e (log/error "----" e)))))
     (let [resp (http-util/do-request (merge {:url url :method method}
                                             (opts-fn)
                                             (create-params session-cookie-name cas-session-id body)))]
