@@ -2,7 +2,8 @@
   (:require [ataru.cas.client :as cas]
             [ataru.config.url-helper :as url]
             [cheshire.core :as json]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [taoensso.timbre :as log]))
 
 (defprotocol KayttooikeusService
   (virkailija-by-username [this username]))
@@ -17,6 +18,7 @@
     (let [url                   (url/resolve-url :kayttooikeus-service.kayttooikeus.kayttaja
                                                  {"username" username})
           {:keys [status body]} (cas/cas-authenticated-get kayttooikeus-cas-client url)]
+      (log/info "-------username: " username)
       (if (= 200 status)
         (if-let [virkailija (first (json/parse-string body true))]
           virkailija

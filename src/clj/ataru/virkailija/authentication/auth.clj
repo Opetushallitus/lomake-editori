@@ -25,11 +25,9 @@
 (defn cas-login [cas-client ticket]
   (fn []
     (log/info "GOT  TICKET: " ticket)
-    (log/info "cas-client: " cas-client)
-    (comment when ticket
-      [(.run (.validateServiceTicketWithVirkailijaUsername cas-client (resolve-url :ataru.login-success) ticket))
-       ticket])
-    ticket))
+    (when ticket
+      [(.validateServiceTicketWithVirkailijaUsername cas-client (resolve-url :ataru.login-success) ticket)
+       ticket])))
 
 (defn- user-right-organizations->organization-rights
   "Takes map keyed by right with list of organizations as values, outputs map keyed by organization oid with list of rights as values"
@@ -99,6 +97,7 @@
                           :henkilo              henkilo
                           :ticket               ticket
                           :success-redirect-url redirect-url})]
+        (log/info "login response:" response)
         (login-succeeded organization-service audit-logger session response virkailija henkilo username ticket))
       (login-failed))
     (catch Exception e

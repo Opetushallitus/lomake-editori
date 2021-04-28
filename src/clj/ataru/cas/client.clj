@@ -1,8 +1,7 @@
 (ns ataru.cas.client
   (:require [ataru.config.url-helper :refer [resolve-url]]
             [ataru.config.core :refer [config]]
-            [ataru.util.http-util :as http-util]
-            [cheshire.core :as json]
+            ;[cheshire.core :as json]
             [java-time :as t]
             [taoensso.timbre :as log])
   (:import [fi.vm.sade.javautils.cas CasHttpClient]
@@ -33,18 +32,19 @@
                           :session-cookie-name session-cookie-name
                           :session-id          (atom nil)})))
 
-(defn- request-with-json-body [request body]
-  (-> request
-      (assoc-in [:headers "Content-Type"] "application/json")
-      (assoc :body (json/generate-string body))))
+;(defn- request-with-json-body [request body]
+;  (-> request
+;      (assoc-in [:headers "Content-Type"] "application/json")
+;      (assoc :body (json/generate-string body))))
 
-(defn- create-params [session-cookie-name cas-session-id body]
-  (cond-> {:cookies           {session-cookie-name {:value @cas-session-id :path "/"}}
-           :redirect-strategy :none
-           :throw-exceptions  false}
-          (some? body) (request-with-json-body body)))
+;(defn- create-params [session-cookie-name cas-session-id body]
+;  (cond-> {:cookies           {session-cookie-name {:value @cas-session-id :path "/"}}
+;           :redirect-strategy :none
+;           :throw-exceptions  false}
+;          (some? body) (request-with-json-body body)))
 
-(defn- cas-http [client method url opts-fn & [body]]
+;(defn- cas-http [client method url opts-fn & [body]]
+(defn- cas-http [client method url & [body]]
   (log/info "CREATING REQUEST...")
   (let [cas-client (:client client)
         session-cookie-name (:session-cookie-name client)
@@ -65,20 +65,31 @@
         ]
     (log/info "REQUEST CREATED!" request)
     (log/error "CALLING CAS CLIENT WITH PARAMETERS: " session-cookie-name cas-session-id url)
-    (when (nil? @cas-session-id)
-      (reset! cas-session-id (try (.run (.call cas-client request))
-                                  (catch Exception e (log/error "----" e)))))
-    (let [resp (http-util/do-request (merge {:url url :method method}
-                                            (opts-fn)
-                                            (create-params session-cookie-name cas-session-id body)))]
-      (if (or (= 401 (:status resp))
-              (= 302 (:status resp)))
-        (do
-          (reset! cas-session-id (.run (.call cas-client request)))
-          (http-util/do-request (merge {:url url :method method}
-                                       (opts-fn)
-                                       (create-params session-cookie-name cas-session-id body))))
-        resp))))
+    ;(when (nil? @cas-session-id)
+    ;  (reset! cas-session-id (try (.callBlocking cas-client request)
+    ;                              (catch Exception e (log/error "----" e)))))
+    (log/info "CAS SESSION ID: " @cas-session-id)
+    (let [
+          ;resp (http-util/do-request (merge {:url url :method method}
+          ;                                  (opts-fn)
+          ;                                  (create-params session-cookie-name cas-session-id body)))
+          resp (.callBlocking cas-client request)
+          body (.string (.body resp))
+          status (.code resp)
+          response {:status status :body body}
+          ]
+      (log/info "----> RESPONSE: " response)
+      ;(if (or (= 401 (:status resp))
+      ;        (= 302 (:status resp)))
+      ;  (do
+      ;    (log/info "REQUEST CREATED BECAUSE RESPONSE IS 302 OR 401!" request)
+      ;    (reset! cas-session-id (try (.callBlocking cas-client request)
+      ;                                (catch Exception e (log/error "----" e))))
+      ;    (http-util/do-request (merge {:url url :method method}
+      ;                                 (opts-fn)
+      ;                                 (create-params session-cookie-name cas-session-id body))))
+      ;  resp1)
+      response)))
 
 (defn cas-authenticated-get [client url]
   (log/info "cas-authenticated-get: " client url)
