@@ -79,74 +79,104 @@
       (handler value))))
 
 (defn email-field [field-descriptor idx]
-  (let [id            (keyword (:id field-descriptor))
-        size          (get-in field-descriptor [:params :size])
-        size-class    (text-field-size->class size)
-        answer        @(subscribe [:application/answer id idx nil])
-        form-field-id (application-field/form-field-id field-descriptor idx)
-        on-change     #(if idx
-                         (multi-value-field-change field-descriptor idx %)
-                         (textual-field-change field-descriptor %))
-        show-error?   @(subscribe [:application/show-validation-error-class? id idx nil])
-        value         (:value answer)
-        languages     @(subscribe [:application/default-languages])
-        lang          @(subscribe [:application/form-language])]
-    [:div.application__form-field
-     [form-field-label-component/form-field-label field-descriptor form-field-id]
-     [:div.application__form-info-element
-      [markdown-paragraph (tu/get-hakija-translation :email-info-text lang) false nil]]
-     [:input.application__form-text-input
-      (merge {:id            form-field-id
-              :type          "text"
-              :placeholder   (when-let [input-hint (-> field-descriptor :params :placeholder)]
-                               (util/non-blank-val input-hint languages))
-              :class         (str size-class
-                                  (if show-error?
-                                    " application__form-field-error"
-                                    " application__form-text-input--normal"))
-              :on-blur       (event->value (fn [value]
-                                             (on-change (clojure.string/trim (or value "")))
-                                             (textual-field-blur field-descriptor)))
-              :on-change     (event->value on-change)
-              :required      (is-required-field? field-descriptor)
-              :aria-invalid  (not (:valid answer))
-              :autoComplete  autocomplete-off
-              :value         value
-              :default-value (if @(subscribe [:application/cannot-view? id])
-                               "***********"
-                               (:value answer))
-              :on-paste      (fn [event]
-                               (.preventDefault event))
-              :data-test-id  "email-input"}
-             (when @(subscribe [:application/cannot-edit? id])
-               {:disabled true}))]
-     [validation-error (:errors answer)]
-     (let [id           :verify-email
-           verify-label (tu/get-hakija-translation :verify-email lang)]
-       [:div
-        [:label.application__form-field-label.label.application__form-field-label--verify-email
-         {:id  "application-form-field-label-verify-email"
-          :for id}
-         [:span (str verify-label (required-hint field-descriptor))]]
-        [:input.application__form-text-input
-         {:id           id
-          :type         "text"
-          :required     true
-          :value        (if @(subscribe [:application/cannot-view? id])
-                          "***********"
-                          (:verify answer))
-          :on-blur      #(email-verify-field-change field-descriptor (:value answer)
-                                                    (clojure.string/trim (or (-> % .-target .-value) "")))
-          :on-paste     (fn [event]
-                          (.preventDefault event))
-          :on-change    #(email-verify-field-change field-descriptor (:value answer) (-> % .-target .-value))
-          :class        (str size-class
-                             (if show-error?
-                               " application__form-field-error"
-                               " application__form-text-input--normal"))
-          :aria-invalid (not (:valid answer))
-          :autoComplete autocomplete-off
-          :data-test-id "verify-email-input"}]])]))
+      (let [id            (keyword (:id field-descriptor))
+            size          (get-in field-descriptor [:params :size])
+            size-class    (text-field-size->class size)
+            languages     @(subscribe [:application/default-languages])
+            form-field-id (application-field/form-field-id field-descriptor idx)
+            local-state   (r/atom {:focused? false :focused-verify? false :value nil :value-verify nil})
+            lang          @(subscribe [:application/form-language])
+            text-main     (tu/get-hakija-translation :email-info-text lang)
+            text-verify   (tu/get-hakija-translation :verify-email lang)
+            cannot-view?  @(subscribe [:application/cannot-view? id])]
+           (fn [field-descriptor idx]
+               (let [answer        @(subscribe [:application/answer id idx nil])
+                     on-change     #(if idx
+                                        (multi-value-field-change field-descriptor idx %)
+                                        (textual-field-change field-descriptor %))
+                     show-error?   @(subscribe [:application/show-validation-error-class? id idx nil])
+                     value         (cond cannot-view?
+                                         "***********"
+                                         (:focused? @local-state)
+                                         (:value @local-state)
+                                         :else
+                                         (:value answer))]
+                    [:div.application__form-field
+                     [form-field-label-component/form-field-label field-descriptor form-field-id]
+                     [:div.application__form-info-element
+                      [markdown-paragraph text-main false nil]]
+                     [:input.application__form-text-input
+                      (merge {:id            form-field-id
+                              :type          "text"
+                              :placeholder   (when-let [input-hint (-> field-descriptor :params :placeholder)]
+                                                       (util/non-blank-val input-hint languages))
+                              :class         (str size-class
+                                                  (if show-error?
+                                                      " application__form-field-error"
+                                                      " application__form-text-input--normal"))
+                              :on-blur       (event->value (fn [value]
+                                                               (swap! local-state assoc
+                                                                      :focused? false)
+                                                               (on-change (clojure.string/trim (or value "")))
+                                                               (textual-field-blur field-descriptor)))
+                              :on-change    (event->value (fn [value]
+                                                              (swap! local-state assoc
+                                                                   :focused? true
+                                                                   :value value)
+                                                              (on-change value)))
+                              :required      (is-required-field? field-descriptor)
+                              :aria-invalid  (not (:valid answer))
+                              :autoComplete  autocomplete-off
+                              :value         value
+                              :default-value (if @(subscribe [:application/cannot-view? id])
+                                                 "***********"
+                                                 (:value answer))
+                              :on-paste      (fn [event]
+                                                 (.preventDefault event))
+                              :data-test-id  "email-input"}
+                             (when @(subscribe [:application/cannot-edit? id])
+                                   {:disabled true}))]
+                     [validation-error (:errors answer)]
+                     (let [id           :verify-email
+                           get-verify-value (fn [] (cond cannot-view?
+                                                         "***********"
+                                                         (:focused-verify? @local-state)
+                                                         (:value-verify @local-state)
+                                                         :else
+                                                         (:verify answer)))]
+                          [:div
+                           [:label.application__form-field-label.label.application__form-field-label--verify-email
+                            {:id  "application-form-field-label-verify-email"
+                             :for id}
+                            [:span (str text-verify (required-hint field-descriptor))]]
+                           [:input.application__form-text-input
+                            {:id           id
+                             :type         "text"
+                             :required     true
+                             :on-blur      (fn [_]
+                                             (swap! local-state assoc
+                                                    :focused-verify? false)
+                                             (email-verify-field-change field-descriptor (:value answer)
+                                                                          (clojure.string/trim (or (get-verify-value) ""))))
+
+                             :on-paste     (fn [event]
+                                               (.preventDefault event))
+                             :on-change    (event->value (fn [value]
+                                                             (swap! local-state assoc
+                                                                    :focused-verify? true
+                                                                    :value-verify value)
+                                                             (email-verify-field-change field-descriptor (:value answer) (get-verify-value))))
+                             :value        (get-verify-value)
+                             :class        (str size-class
+                                                (if show-error?
+                                                    " application__form-field-error"
+                                                    " application__form-text-input--normal"))
+                             :aria-invalid (not (:valid answer))
+                             :autoComplete autocomplete-off
+                             :data-test-id "verify-email-input"}]])])
+               )
+           )
+      )
 
 (defn- options-satisfying-condition [field-descriptor answer-value options]
   (filter (option-visibility/visibility-checker field-descriptor answer-value) options))
