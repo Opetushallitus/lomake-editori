@@ -1,19 +1,17 @@
 (ns ataru.hakija.rules-test
-  (:require [cljs.test :refer-macros [deftest are is]]
+  (:require [cljs.test :refer-macros [deftest is]]
             [ataru.util :as util]
             [ataru.hakija.rules :as rules]))
 
 
 (deftest rule-runner
   (let [rule-fn                 (fn [db argument]
-                                  (do
                                     (is (= argument [:argument :a :b :c]))
                                     (is (= (:this-is-a-test-db db) :test-db))
-                                    (assoc db :rule-fn-ran? true)))
+                                    (assoc db :rule-fn-ran? true))
         rule-fn2                (fn [db argument]
-                                  (do
                                     (is (= argument [:foo]))
-                                    (assoc db :rule-fn2-ran? true)))
+                                    (assoc db :rule-fn2-ran? true))
         rule-to-fn              (fn [rule]
                                   (case rule
                                     :test-rule   rule-fn

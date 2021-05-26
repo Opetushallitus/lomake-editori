@@ -4,7 +4,6 @@
             [ataru.preferred-name :as pn]
             [ataru.koodisto.koodisto-codes :refer [finland-country-code]]
             [ataru.hakija.arvosanat.valinnainen-oppiaine-koodi :as vok]
-            clojure.string
             [clojure.string :as string])
   (:require-macros [cljs.core.match :refer [match]]))
 
@@ -15,7 +14,7 @@
 
 (defn- blank-value? [value]
   (or (and (string? value)
-           (clojure.string/blank? value))
+           (string/blank? value))
       (and (vector? value)
            (-> value first blank-value?))))
 
@@ -223,7 +222,7 @@
   (let [answers     (-> db :application :answers)
         country     (-> answers :country-of-residence :value)
         is-finland? (or (= country finland-country-code)
-                        (clojure.string/blank? country))
+                        (string/blank? country))
         postal-code (-> answers :postal-code)
         auto-input? (and is-finland?
                          (= 5 (count (:value postal-code))))]
@@ -247,7 +246,7 @@
   [db]
   (let [country     (get-in db [:application :answers :country-of-residence :value])
         is-finland? (or (= country finland-country-code)
-                        (clojure.string/blank? country))]
+                        (string/blank? country))]
     (if is-finland?
       (-> db
           (show-field :home-town)
@@ -263,10 +262,10 @@
 (defn- prefill-preferred-first-name
   [db _]
   (let [answers        (-> db :application :answers)
-        first-name     (-> answers :first-name :value (clojure.string/trim) (clojure.string/split #" ") first)
+        first-name     (-> answers :first-name :value (string/trim) (string/split #" ") first)
         preferred-name (-> answers :preferred-name :value)]
     (cond
-      (and first-name (clojure.string/blank? preferred-name))
+      (and first-name (string/blank? preferred-name))
       (-> db
           (update-in [:application :answers :preferred-name] merge
                      {:value first-name
@@ -275,7 +274,7 @@
                      {:valid true
                       :value first-name}))
 
-      (and first-name (not (clojure.string/blank? preferred-name)))
+      (and first-name (not (string/blank? preferred-name)))
       (-> db
           (update-in [:application :answers :preferred-name] merge
                      {:valid (pn/main-first-name? {:value preferred-name :answers-by-key answers})})
