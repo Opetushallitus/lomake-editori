@@ -4,6 +4,7 @@
             [ataru.preferred-name :as pn]
             [ataru.koodisto.koodisto-codes :refer [finland-country-code]]
             [ataru.hakija.arvosanat.valinnainen-oppiaine-koodi :as vok]
+            [ataru.date :as date]
             [clojure.string :as string])
   (:require-macros [cljs.core.match :refer [match]]))
 
@@ -176,6 +177,34 @@
       (hide-field db :birthplace)
       (show-field db :birthplace))))
 
+(defn- guardian-contact
+  ^{:dependencies [:birth-date]}
+  [db]
+  (let [fields [:guardian-contact-information
+                :guardian-contact-minor
+                :guardian-contact-minor-secondary
+                :guardian-name
+                :guardian-phone
+                :guardian-email
+                :guardian-name-secondary
+                :guardian-phone-secondary
+                :guardian-email-secondary]
+        editing? (get-in db [:application :editing?])
+        minor? (if editing?
+                 (get-in db [:application :person :minor])
+                 (date/minor? (get-in db [:application :answers :birth-date :value])))
+        all-empty (every? (fn [field]
+                            (let [value (get-in db [:application :answers field :value])]
+                              (cond
+                                (vector? value) (every? string/blank? value)
+                                :else (string/blank? value)))) fields)]
+    (if (or (not all-empty) minor?)
+      (reduce (fn [db' field] (show-field db' field true)) db fields)
+      (reduce (fn [db' field] (hide-field db' field)) db fields))))
+
+(defn- toggle-birth-date-based-fields [db]
+  (guardian-contact db))
+
 (defn swap-ssn-birthdate-based-on-nationality
   [db _]
   (-> db
@@ -184,7 +213,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- update-gender-and-birth-date-based-on-ssn
   [db _]
@@ -194,7 +224,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- toggle-ssn-based-fields
   [db _]
@@ -204,7 +235,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- toggle-ssn-based-fields-without-gender
   [db _]
@@ -214,7 +246,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date))
+      birth-date
+      toggle-birth-date-based-fields))
 
 (defn- postal-office
   ^{:dependencies [:country-of-residence :postal-code]}
@@ -400,6 +433,8 @@
     select-postal-office-based-on-postal-code
     :toggle-ssn-based-fields
     toggle-ssn-based-fields
+    :toggle-birthdate-based-fields
+    toggle-birth-date-based-fields
     :toggle-ssn-based-fields-without-gender
     toggle-ssn-based-fields-without-gender
     :change-country-of-residence

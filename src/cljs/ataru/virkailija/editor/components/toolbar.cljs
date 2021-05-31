@@ -34,7 +34,8 @@
    [:kk-base-education-module kk-base-education-module/module]
    [:pohjakoulutusristiriita component/pohjakoulutusristiriita]
    [:lupa-sahkoiseen-asiointiin component/lupa-sahkoiseen-asiointiin]
-   [:lupatiedot component/lupatiedot]])
+   [:lupatiedot component/lupatiedot]
+   [:guardian-contact-information component/huoltajan-yhteystiedot]])
 
 (def followup-toolbar-element-names
   #{:text-field

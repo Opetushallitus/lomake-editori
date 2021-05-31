@@ -113,7 +113,8 @@
                    :id :birth-date
                    :metadata metadata
                    :validators [:past-date :required])
-                 {:params {:placeholder (:date-formats person-info-module-texts)}})
+                 {:params {:placeholder (:date-formats person-info-module-texts)}
+                  :rules {:toggle-birthdate-based-fields nil}})
      (gender-section metadata)]
     metadata))
 
@@ -127,7 +128,8 @@
          :id :birth-date
          :metadata metadata
          :validators [:past-date :required])
-       {:params {:placeholder (:date-formats person-info-module-texts)}})]
+       {:params {:placeholder (:date-formats person-info-module-texts)}
+        :rules {:toggle-birthdate-based-fields nil}})]
     metadata))
 
 (defn- ssn-birthdate-gender-wrapper

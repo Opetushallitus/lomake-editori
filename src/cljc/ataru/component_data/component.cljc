@@ -207,6 +207,42 @@
                     (valintatuloksen-julkaisulupa metadata)
                     (asiointikieli metadata)]))
 
+(defn huoltajan-nimi [metadata idx]
+  (assoc (text-field metadata)
+    :id (str "guardian-name" idx)
+    :label (:guardian-name texts/translation-mapping)
+    :validators []))
+
+(defn huoltajan-puhelin [metadata suffix]
+  (assoc (text-field metadata)
+    :id (str "guardian-phone" suffix)
+    :label (:guardian-phone texts/translation-mapping)
+    :validators []))
+
+(defn huoltajan-email [metadata suffix]
+  (assoc (text-field metadata)
+    :id (str "guardian-email" suffix)
+    :label (:guardian-email texts/translation-mapping)
+    :validators [:email-simple]))
+
+(defn huoltajan-yhteystiedot-rivi [metadata secondary]
+  (let [translation-key (if-not secondary
+                          :guardian-contact-minor
+                          :guardian-contact-minor-secondary)
+        suffix (when secondary "-secondary")]
+    (assoc (adjacent-fieldset metadata)
+      :label (get texts/translation-mapping translation-key)
+      :children [(huoltajan-nimi metadata suffix)
+                 (huoltajan-puhelin metadata suffix)
+                 (huoltajan-email metadata suffix)])))
+
+(defn huoltajan-yhteystiedot [metadata]
+  (assoc (form-section metadata)
+         :id "guardian-contact-information"
+         :label (:guardian-contact-information texts/translation-mapping)
+         :children [(huoltajan-yhteystiedot-rivi metadata false)
+                    (huoltajan-yhteystiedot-rivi metadata true)]))
+
 (def lupatiedot-questions
   (->> (lupatiedot {})
        :children

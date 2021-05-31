@@ -218,6 +218,24 @@
    :finnish                                     {:fi "Suomi"
                                                  :sv "Finska"
                                                  :en "Finnish"}
+   :guardian-contact-information                {:fi "Huoltajan yhteystiedot"
+                                                 :sv "Vårdnadshavarens kontaktuppgifter"
+                                                 :en "Guardians contact information"}
+   :guardian-contact-minor                      {:fi "Huoltajan tiedot (jos olet alle 18v)"
+                                                 :sv "Vårnadshavarens kontaktuppgifter (om du är mindreårig)"
+                                                 :en "Guardians contact information (if you are minor)"}
+   :guardian-contact-minor-secondary            {:fi "Toisen huoltajan tiedot (jos olet alle 18v)"
+                                                 :sv "Den andara vårnadshavarens kontaktuppgifter (om du är mindreårig)"
+                                                 :en "The other guardians contact information (if you are minor)"}
+   :guardian-email                              {:fi "Huoltajan sähköpostiosoite"
+                                                 :sv "Vårnadshavarens e-postadress"
+                                                 :en "Guardians e-mail address"}
+   :guardian-name                               {:fi "Huoltajan nimi"
+                                                 :sv "Vårdnadshavarens namn"
+                                                 :en "Guardians name"}
+   :guardian-phone                              {:fi "Huoltajan matkapuhelin"
+                                                 :sv "Vårdnadshavarens mobiltelefonnummer"
+                                                 :en "Guardians mobile phone number"}
    :hakija-new-text                             {:fi "LÄHETÄ HAKEMUS"
                                                  :sv "SKICKA ANSÖKAN"
                                                  :en "SUBMIT APPLICATION"}
@@ -1180,6 +1198,9 @@
    :eligibility-set-automatically                   {:fi "Hakukelpoisuus asetettu automaattisesti"
                                                      :sv "Ansökningsbehörigheten har satts automatiskt"
                                                      :en "Eligibility set automatically"}
+   :guardian-contact-information                    {:fi "Huoltajan yhteystiedot"
+                                                     :sv "Vårdnadshavarens kontaktuppgifter"
+                                                     :en "Guardians contact information"}
    :payment-obligation                              {:fi "Maksuvelvollisuus"
                                                      :sv "Betalningsskyldighet"
                                                      :en "Obligated to pay"}
