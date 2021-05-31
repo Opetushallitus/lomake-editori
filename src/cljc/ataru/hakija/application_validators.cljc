@@ -105,6 +105,12 @@
             :else
             [true []]))))
 
+(defn- email-simple?
+  [{:keys [value]}]
+  (if (clojure.string/blank? value)
+    true
+    (email/email? value)))
+
 (defn- selection-limit?
   [{:keys [try-selection value field-descriptor]}]
   (let [id (:id field-descriptor)]
@@ -283,7 +289,8 @@
                       :home-town                      home-town?
                       :city                           city?
                       :hakukohteet                    hakukohteet?
-                      :numeric                        numeric?})
+                      :numeric                        numeric?
+                      :email-simple                   email-simple?})
 
 (def async-validators {:selection-limit selection-limit?
                        :ssn ssn?

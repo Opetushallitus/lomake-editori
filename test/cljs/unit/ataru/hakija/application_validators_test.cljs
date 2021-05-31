@@ -8,9 +8,9 @@
             [ataru.fixtures.first-name :as first-name]
             [ataru.hakija.application-validators :as validator]
             [cljs.core.async :as async]
-            [cljs.test :refer-macros [deftest is testing async]]))
+            [cljs.test :refer-macros [deftest is async]]))
 
-(defn- has-never-applied [haku-oid identifier] (asyncm/go false))
+(defn- has-never-applied [_ _] (asyncm/go false))
 
 (deftest ssn-validation
   (async done
@@ -50,6 +50,31 @@
                                                                              :params {:can-submit-multiple-applications false
                                                                                       :haku-oid                         "dummy-haku-oid"}}})))))
            (done))))
+
+(deftest email-simple-validation
+  (async done
+    (asyncm/go
+      (is (true? (first (async/<! (validator/validate {:has-applied      has-never-applied
+                                                       :validator        "email-simple"
+                                                       :value            nil
+                                                       :answers-by-key   {:email-simple {:value nil}}
+                                                       :field-descriptor {:id :email-simple}})))))
+      (is (true? (first (async/<! (validator/validate {:has-applied      has-never-applied
+                                                       :validator        "email-simple"
+                                                       :value            ""
+                                                       :answers-by-key   {:email-simple {:value ""}}
+                                                       :field-descriptor {:id :email-simple}})))))
+      (is (true? (first (async/<! (validator/validate {:has-applied      has-never-applied
+                                                       :validator        "email-simple"
+                                                       :value            "test@example.com"
+                                                       :answers-by-key   {:email-simple {:value "test@example.com"}}
+                                                       :field-descriptor {:id :email-simple}})))))
+      (is (false? (first (async/<! (validator/validate {:has-applied      has-never-applied
+                                                        :validator        "email-simple"
+                                                        :value            "not-valid"
+                                                        :answers-by-key   {:email-simple {:value "not-valid"}}
+                                                        :field-descriptor {:id :email-simple}}))))))
+    (done)))
 
 (deftest postal-code-validation
   (async done
