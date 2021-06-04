@@ -1448,7 +1448,8 @@
                                                                   :person-service
                                                                   :organization-service
                                                                   :audit-logger
-                                                                  :session-store]))))
+                                                                  :session-store
+                                                                  :cas-logout]))))
                               (api/undocumented
                                 (route/not-found "Not found")))
                             (wrap-defaults (-> site-defaults

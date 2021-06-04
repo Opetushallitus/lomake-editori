@@ -29,7 +29,8 @@
                            person-service
                            organization-service
                            audit-logger
-                           session-store]}]
+                           session-store
+                           cas-logout]}]
   (api/context "/auth" []
     (api/middleware [session-client/wrap-session-client-headers]
                     (api/undocumented
@@ -48,6 +49,6 @@
                                  redirect-url
                                  (:session request))))
                       (api/POST "/cas" [logoutRequest]
-                        (cas-initiated-logout logoutRequest session-store))
+                        (cas-initiated-logout logoutRequest session-store cas-logout))
                       (api/GET "/logout" {session :session}
                         (crdsa-login/logout session (resolve-url :cas.logout)))))))

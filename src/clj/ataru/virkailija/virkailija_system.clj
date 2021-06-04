@@ -81,7 +81,7 @@
          :refresh-after       [1 TimeUnit/SECONDS]})
       {:redis-cache :valintalaskentakoostepalvelu-hakukohde-valintalaskenta-redis-cache})
 
-    :valinta-tulos-service-cas-client (cas/new-client "/valinta-tulos-service" "auth/login"
+    :valinta-tulos-service-cas-client (cas/new-client "/valinta-tulos-service" "/auth/login"
                                                       "session" (-> config :public-config :virkailija-caller-id))
 
     :valinta-tulos-service (component/using
@@ -161,9 +161,11 @@
                      (person-service/new-person-service)
                      [:henkilo-cache :oppijanumerorekisteri-cas-client])
 
-    :login-cas-client (cas/new-cas-client (-> config :public-config :virkailija-caller-id))
+    :login-cas-client (cas/new-cas-client "/cas/login" "/auth/cas" "ring-session" (-> config :public-config :virkailija-caller-id))
 
-    :liiteri-cas-client (cas/new-client "/liiteri" "/liiteri/auth/cas"
+    :cas-logout (cas/cas-logout)
+
+    :liiteri-cas-client (cas/new-client "/liiteri" "/auth/cas"
                                         "ring-session" (-> config :public-config :virkailija-caller-id))
 
     :application-service (component/using
@@ -195,7 +197,8 @@
                             :kayttooikeus-service
                             :audit-logger
                             :application-service
-                            :session-store]
+                            :session-store
+                            :cas-logout]
                            (map first caches))))
 
     :server-setup {:port      http-port

@@ -58,7 +58,7 @@
     :oppijanumerorekisteri-cas-client (cas/new-client "/oppijanumerorekisteri-service" "j_spring_cas_security_check"
                                                       "JSESSIONID" (-> config :public-config :hakija-caller-id))
 
-    :liiteri-cas-client (cas/new-client "/liiteri" "/liiteri/auth/cas"
+    :liiteri-cas-client (cas/new-client "/liiteri" "/auth/cas"
                                         "ring-session" (-> config :public-config :hakija-caller-id))
 
     :credentials-provider (aws-auth/map->CredentialsProvider {})
@@ -100,7 +100,7 @@
                         [:s3-client])
                        (filesystem-temp-file-store/new-store))
 
-    :valinta-tulos-service-cas-client (cas/new-client "/valinta-tulos-service" "auth/login"
+    :valinta-tulos-service-cas-client (cas/new-client "/valinta-tulos-service" "/auth/login"
                                                       "session" (-> config :public-config :hakija-caller-id))
 
     :valinta-tulos-service (component/using
