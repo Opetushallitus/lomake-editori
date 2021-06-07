@@ -6,7 +6,8 @@
             [ataru.person-service.person-client :as person-client]
             [ataru.util :as util]
             [clojure.string :as cs]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [ataru.date :as date]))
 
 (defprotocol PersonService
   (create-or-find-person [this person]
@@ -21,12 +22,17 @@
   (linked-oids [this oids]))
 
 (defn- person-info-from-application [application]
-  (let [answers (util/answers-by-key (:answers application))]
+  (let [answers (util/answers-by-key (:answers application))
+        birth-date (-> answers :birth-date :value)]
     (merge {:first-name     (-> answers :first-name :value)
             :preferred-name (-> answers :preferred-name :value)
             :last-name      (-> answers :last-name :value)
-            :birth-date     (-> answers :birth-date :value)
+            :birth-date     birth-date
             :nationality    (-> answers :nationality :value)}
+           (when-not (cs/blank? birth-date)
+             (let [minor (date/minor? birth-date)]
+               (when (boolean? minor)
+                 {:minor (date/minor? birth-date)})))
            (when-not (cs/blank? (-> answers :ssn :value))
              {:ssn (-> answers :ssn :value)})
            (when-not (cs/blank? (-> answers :gender :value))
@@ -45,7 +51,10 @@
                                (mapv #(vector (get % :kansalaisuusKoodi "999"))))}
          (let [birth-date (:syntymaaika person)]
            (when-not (cs/blank? birth-date)
-             {:birth-date (bd-converter/convert-to-finnish-format birth-date)}))
+             (let [finnish-birth-date (bd-converter/convert-to-finnish-format birth-date)
+                   minor (date/minor? finnish-birth-date)]
+               (cond-> {:birth-date finnish-birth-date}
+                       (boolean? minor) (assoc :minor minor)))))
          (when-not (cs/blank? (:hetu person))
            {:ssn (:hetu person)})
          (when-not (cs/blank? (-> person :sukupuoli))

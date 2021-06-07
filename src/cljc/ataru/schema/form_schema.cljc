@@ -389,7 +389,8 @@
    (s/optional-key :birth-date)  s/Str
    (s/optional-key :gender)      s/Str
    (s/optional-key :language)    s/Str
-   (s/optional-key :ssn)         s/Str})
+   (s/optional-key :ssn)         s/Str
+   (s/optional-key :minor)       s/Bool})
 
 (s/defschema ApplicationWithPerson
   (-> Application
