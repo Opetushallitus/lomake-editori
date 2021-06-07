@@ -670,6 +670,7 @@
 (s/defschema EmailTemplate {:lang           (s/enum "fi" "sv" "en")
                             :content        s/Str
                             :content-ending s/Str
+                            :signature      s/Str
                             :subject        (s/constrained s/Str (comp not string/blank?))})
 
 (s/defschema Sort

@@ -46,6 +46,7 @@
         </td>
       </tr>
       {% endif %}
+      {% if application-url|not-empty %}
       <tr>
         <td style="padding-left: 20px; padding-top: 20px;">
           Muutokset hakemukseesi on tallennettu. Voit tehdä muutoksia
@@ -55,6 +56,7 @@
           jaa linkkiä ulkopuolisille.
         </td>
       </tr>
+      {% endif %}
       <tr>
         <td style="padding-left: 20px; padding-top: 20px;">
           Älä vastaa tähän viestiin - viesti on lähetetty automaattisesti.

@@ -1,10 +1,9 @@
 (ns ataru.virkailija.views.template-editor
-  (:require [ataru.translations.texts :refer [email-default-texts]]
-            [ataru.virkailija.views.modal :as modal]
+  (:require [ataru.virkailija.views.modal :as modal]
             [goog.string :as s]
             [re-frame.core :refer [subscribe dispatch]]
-            [reagent.core :as r]
-            [reagent.core :as reagent]))
+            [clojure.string]
+            [reagent.core :as r]))
 
 (defn- get-body-class-list
   []
@@ -22,7 +21,6 @@
             contents-changed @(subscribe [:editor/email-templates-altered])
             any-changed?     (some true? (vals contents-changed))
             any-errors?      (some true? (map #(clojure.string/blank? (:subject %)) (vals content)))
-            virkailija-lang  (subscribe [:editor/virkailija-lang])
             lang-content     (get-in content [(name @tab-lang)])]
         [modal/modal
          #(dispatch [:editor/toggle-email-template-editor])
@@ -46,7 +44,7 @@
                      :value     (name button-lang)
                      :id        (str "email-template-language-selection-" (name button-lang))
                      :checked   (= button-lang @tab-lang)
-                     :on-change (fn [c]
+                     :on-change (fn [_]
                                   (reset! tab-lang button-lang))}]
                    [:label.virkailija-email-preview__tab-label
                     {:key   (str "email-preview-lang-radio-label-" (name @tab-lang))
@@ -72,6 +70,10 @@
               [:textarea.virkailija-email-preview__text-input
                {:value     (:content-ending lang-content)
                 :on-change #(dispatch [:editor/update-email-preview (name @tab-lang) :content-ending (.-value (.-target %))])}]
+              [:h4.virkailija-email-preview__sub-heading @(subscribe [:editor/virkailija-translation :editable-signature])]
+              [:textarea.virkailija-email-preview__text-input
+               {:value     (:signature lang-content)
+                :on-change #(dispatch [:editor/update-email-preview (name @tab-lang) :signature (.-value (.-target %))])}]
               [:div.virkailija-email-preview__preview-container
                [:h4.virkailija-email-preview__sub-heading @(subscribe [:editor/virkailija-translation :message-preview])]
                [:iframe.virkailija-email-preview__preview-iframe
@@ -95,7 +97,7 @@
                          ")")))]]]]])]]))))
 
 (defn email-template-editor []
-  (reagent/create-class
+  (r/create-class
     {:component-did-mount    #(.add (get-body-class-list) "virkailija-modal-enabled")
      :component-will-unmount #(.remove (get-body-class-list) "virkailija-modal-enabled")
      :reagent-render         render-template-editor}))
