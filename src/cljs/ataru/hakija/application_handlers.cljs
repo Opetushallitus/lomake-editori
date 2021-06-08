@@ -758,6 +758,14 @@
                     [:application/run-rules (:rules field-descriptor)]]})))
 
 (reg-event-fx
+  :application/set-application-text-field
+  (fn [{db :db} [_ field-descriptor value]]
+    ;jos field-descriptorissa on section-visibility-conditions, tee rule run ja piilota osio
+    (prn "SETTING TXT FIELD" value field-descriptor)
+    {:db db
+     :dispatch [:application/set-repeatable-application-field field-descriptor nil nil value]}))
+
+(reg-event-fx
   :application/set-repeatable-application-field
   [check-schema-interceptor]
   (fn [{db :db} [_ field-descriptor question-group-idx data-idx value]]
