@@ -4,7 +4,7 @@
 
 (declare answer-values)
 
-(defn- non-blank-answer-satisfies-condition? [value option]
+(defn non-blank-answer-satisfies-condition? [value option]
   (and (not (string/blank? value))
        (if-let [condition (:condition option)]
          (let [operator (case (:comparison-operator condition)

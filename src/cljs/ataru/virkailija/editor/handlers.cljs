@@ -104,10 +104,8 @@
           (update-in text-field-path into [component])
           (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
 
-(defn text-field-section-visibility-condition [value section-name]
-  {:value     value
-   :section-name section-name
-   :label     {:fi "" :sv ""}
+(defn text-field-section-visibility-condition [section-name]
+  {:section-name section-name
    :condition {:comparison-operator "<"}})
 
 (reg-event-db
@@ -115,7 +113,7 @@
   (fn [db [_ path]]
     (prn "WTTF")
     (let [text-field-path (current-form-content-path db [path :section-visibility-conditions])
-          section-visibility       (text-field-section-visibility-condition nil nil)]
+          section-visibility       (text-field-section-visibility-condition nil)]
       (-> db
           (update-in text-field-path into [section-visibility])
           (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
@@ -123,7 +121,7 @@
 (reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-operaattori
   (fn [db [_ path option-index value]]
-    (let [condition-path (current-form-content-path db [path :options option-index :condition])]
+    (let [condition-path (current-form-content-path db [path option-index :condition])]
       (update-in db
                  condition-path
                  (fn [condition]
@@ -132,7 +130,7 @@
 (reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-vertailuarvo
   (fn [db [_ path option-index value]]
-    (let [condition-path (current-form-content-path db [path :options option-index :condition])]
+    (let [condition-path (current-form-content-path db [path option-index :condition])]
       (update-in db
                  condition-path
                  (fn [condition]

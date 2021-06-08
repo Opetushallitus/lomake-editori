@@ -210,7 +210,7 @@
     {:on-click (fn [evt]
                  (when-not disabled?
                    (.preventDefault evt)
-                   (dispatch [:editor/poista-tekstikentän-arvon-perusteella-optio (conj path :options option-index)])))}]])
+                   (dispatch [:editor/poista-tekstikentän-arvon-perusteella-optio (conj path option-index)])))}]])
 
 (def ^:private integer-matcher #"([+-]?)(0|[1-9][0-9]*)")
 
@@ -351,7 +351,7 @@
                                                      :condition         (:condition option)
                                                      :followups         followups
                                                      :option-index      index
-                                                     :path              path
+                                                     :path              (conj path :options)
                                                      :show-followups    show-followups}]))
            options))])))
 
@@ -362,11 +362,11 @@
      (doall
        (map-indexed
          (fn [index visibility-condition]
-           ^{:key (str "options-" index)}
+           ^{:key (str "visibility-conditions-" index)}
            [text-field-section-visibility-condition-wrapper {:component-locked? component-locked?
                                                              :condition         (:condition visibility-condition)
                                                              :option-index      index
-                                                             :path              path}])
+                                                             :path              (conj path :section-visibility-conditions)}])
          section-visibility-conditions))]))
 
 (defn- text-field-has-an-option [_ _ _ _]
