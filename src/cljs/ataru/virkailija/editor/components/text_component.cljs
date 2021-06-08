@@ -76,8 +76,46 @@
          :on-blur   #(dispatch [:editor/set-range-value component-id :max-value (format-range (-> % .-target .-value)) path])
          :on-change #(dispatch [:editor/set-range-value component-id :max-value (-> % .-target .-value) path])}]])))
 
+(defn- lomakeosion-piilottaminen-arvon-perusteella [_]
+  (let [id (util/new-uuid)]
+    (fn [{:keys [component-locked?
+                 decimals-in-use?
+                 section-visibility-conditions?
+                 path
+                 repeatable?]}]
+      (let [checked? (or section-visibility-conditions? false)
+            disabled? (or component-locked?
+                          decimals-in-use?
+                          section-visibility-conditions?
+                          repeatable?)]
+        [:div.editor-form__text-field-additional-params-container
+         [:input.editor-form__text-field-checkbox
+          {:id           id
+           :type         "checkbox"
+           :checked      checked?
+           :disabled     disabled?
+           :on-change    (fn [evt]
+                           (when-not disabled?
+                             (.preventDefault evt)
+                             (when (-> evt .-target .-checked)
+                               (dispatch [:editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto path]))))
+           :data-test-id "tekstikenttä-valinta-lomakeosion-piilottaminen-arvon-perusteella"}]
+         [:label.editor-form__text-field-checkbox-label
+          {:for   id
+           :class (when disabled? "editor-form__text-field-checkbox-label--disabled")}
+          "Toisen lomakeosion piilottaminen arvon perusteella"] ;@(subscribe [:editor/virkailija-translation :lisakysymys-arvon-perusteella])
+         (when checked?
+           [:div.editor-form__text-field-checkbox-add-condition
+            [:span " | "]
+            (let [teksti @(subscribe [:editor/virkailija-translation :lisakysymys-arvon-perusteella-lisaa-ehto])]
+              (if component-locked?
+                [:span.editor-form__text-field-checkbox-add-condition-disabled teksti]
+                [:a
+                 {:on-click (fn [] (dispatch [:editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto path]))}
+                 teksti]))])]))))
+
 (defn- lisäkysymys-arvon-perusteella [_]
-  (let [id        (util/new-uuid)]
+  (let [id (util/new-uuid)]
     (fn [{:keys [component-locked?
                  decimals-in-use?
                  followups?
@@ -123,7 +161,9 @@
    [numeerisen-kentän-muoto props]
    [numeerisen-kentän-arvoalueen-rajaus component-id path]
    (when (not (:adjacent-text-field? props))
-     [lisäkysymys-arvon-perusteella props])])
+     [lisäkysymys-arvon-perusteella props])
+   (when (not (:adjacent-text-field? props))
+     [lomakeosion-piilottaminen-arvon-perusteella props])])
 
 (defn text-component-type-selector [_ path _]
   (let [id                (util/new-uuid)
@@ -240,6 +280,19 @@
            :value        (:value @local-state)
            :data-test-id "tekstikenttä-lisäkysymys-arvon-perusteella-ehto-vertailuarvo"}]]))))
 
+(defn- text-field-section-visibility-conditions-header [{:keys [component-locked?
+                                                                condition
+                                                                option-index
+                                                                path]}]
+  [:div.editor-form__text-field-option-followups-header
+   [text-field-option-condition {:condition    condition
+                                 :option-index option-index
+                                 :path         path}]
+   [:div "Valitse piilotettava osio tästä"]                 ;TODO
+   [remove-option {:disabled?    component-locked?
+                   :option-index option-index
+                   :path         path}]])
+
 (defn- text-field-option-followups-header [{:keys [component-locked?
                                                    condition
                                                    followups
@@ -254,6 +307,10 @@
    [remove-option {:disabled?    component-locked?
                    :option-index option-index
                    :path         path}]])
+
+(defn- text-field-section-visibility-condition-wrapper [props]
+  (when (:condition props)
+    [text-field-section-visibility-conditions-header props]))
 
 (defn- text-field-option-followups-wrapper [{:keys [component-locked?
                                                     condition
@@ -298,15 +355,29 @@
                                                      :show-followups    show-followups}]))
            options))])))
 
+(defn- text-field-section-visibility-conditions
+  [_]
+  (fn [{:keys [component-locked? section-visibility-conditions path]}]
+    [:<>
+     (doall
+       (map-indexed
+         (fn [index visibility-condition]
+           ^{:key (str "options-" index)}
+           [text-field-section-visibility-condition-wrapper {:component-locked? component-locked?
+                                                             :condition         (:condition visibility-condition)
+                                                             :option-index      index
+                                                             :path              path}])
+         section-visibility-conditions))]))
+
 (defn- text-field-has-an-option [_ _ _ _]
   (let [id (util/new-uuid)]
     (fn [value followups path component-locked?]
-      (let [option-index               0
+      (let [option-index 0
             options-without-condition? (->> (:options value) (remove :condition) empty? not)
-            options-with-condition?    (->> (:options value) (filter :condition) empty? not)
-            repeatable?                (-> value :params :repeatable boolean)
-            disabled?                  (or component-locked?
-                                           options-with-condition?
+            options-with-condition? (->> (:options value) (filter :condition) empty? not)
+            repeatable? (-> value :params :repeatable boolean)
+            disabled? (or component-locked?
+                          options-with-condition?
                                            (not (empty? (first followups)))
                                            repeatable?)]
         [:div.editor-form__text-field-checkbox-container
@@ -397,16 +468,18 @@
            (when-not text-area?
              [repeater-checkbox-component/repeater-checkbox path initial-content])
            (when-not text-area?
-             (let [options                 (:options @value)
+             (let [{:keys [options section-visibility-conditions]} @value
+                   section-visibility-conditions? (->> section-visibility-conditions (filter :condition) empty? not)
                    options-with-condition? (->> options (filter :condition) empty? not)
-                   props                   {:allow-decimals?            (not options-with-condition?)
-                                            :cannot-change-type?        options-with-condition?
-                                            :component-locked?          @component-locked?
-                                            :decimals-in-use?           (-> @value :params :decimals pos?)
-                                            :followups?                 (->> followups (filter empty?) empty? not)
-                                            :options-with-condition?    options-with-condition?
-                                            :options-without-condition? (->> options (remove :condition) empty? not)
-                                            :repeatable?                (-> @value :params :repeatable boolean)}]
+                   props {:allow-decimals?                (not options-with-condition?)
+                          :cannot-change-type?            (or options-with-condition? section-visibility-conditions?)
+                          :component-locked?              @component-locked?
+                          :decimals-in-use?               (-> @value :params :decimals pos?)
+                          :followups?                     (->> followups (filter empty?) empty? not)
+                          :options-with-condition?        options-with-condition?
+                          :options-without-condition?     (->> options (remove :condition) empty? not)
+                          :repeatable?                    (-> @value :params :repeatable boolean)
+                          :section-visibility-conditions? section-visibility-conditions?}]
                [text-component-type-selector (:id initial-content) path props]))]
           [belongs-to-hakukohteet-component/belongs-to-hakukohteet path initial-content]]
          [:div.editor-form__text-field-checkbox-wrapper
@@ -418,4 +491,7 @@
             [text-field-option-followups {:component-locked? @component-locked?
                                           :followups         followups
                                           :options           (:options @value)
-                                          :path              path}]])]]])))
+                                          :path              path}]
+            [text-field-section-visibility-conditions {:component-locked?             @component-locked?
+                                                       :section-visibility-conditions (:section-visibility-conditions @value)
+                                                       :path                          path}]])]]])))

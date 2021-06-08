@@ -104,6 +104,22 @@
           (update-in text-field-path into [component])
           (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
 
+(defn text-field-section-visibility-condition [value section-name]
+  {:value     value
+   :section-name section-name
+   :label     {:fi "" :sv ""}
+   :condition {:comparison-operator "<"}})
+
+(reg-event-db
+  :editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto
+  (fn [db [_ path]]
+    (prn "WTTF")
+    (let [text-field-path (current-form-content-path db [path :section-visibility-conditions])
+          section-visibility       (text-field-section-visibility-condition nil nil)]
+      (-> db
+          (update-in text-field-path into [section-visibility])
+          (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
+
 (reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-operaattori
   (fn [db [_ path option-index value]]
