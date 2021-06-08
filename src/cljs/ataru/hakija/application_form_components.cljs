@@ -41,7 +41,6 @@
   (dispatch [:application/set-email-verify-field field-descriptor value verify-value]))
 
 (defn- text-field-change [field-descriptor value]
-  (prn "WHAT THE FUUUUUCK")
   (dispatch [:application/set-application-text-field field-descriptor value]))
 
 (defn- textual-field-change [field-descriptor value]

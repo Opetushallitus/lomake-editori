@@ -769,7 +769,6 @@
 (reg-event-fx
   :application/set-application-text-field
   (fn [{db :db} [_ field-descriptor value]]
-    (prn field-descriptor)
     (let [visibility-conditions (:section-visibility-conditions field-descriptor)]
       {:db       (if (seq visibility-conditions)
                    (hide-sections-based-on-conditions db value visibility-conditions)

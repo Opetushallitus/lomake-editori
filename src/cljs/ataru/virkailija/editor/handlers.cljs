@@ -111,7 +111,6 @@
 (reg-event-db
   :editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto
   (fn [db [_ path]]
-    (prn "WTTF")
     (let [text-field-path (current-form-content-path db [path :section-visibility-conditions])
           section-visibility       (text-field-section-visibility-condition nil)]
       (-> db
