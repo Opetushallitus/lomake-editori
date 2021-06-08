@@ -70,6 +70,7 @@
                                                                           (s/optional-key :default-option) s/Any
                                                                           (s/optional-key :title)          s/Str
                                                                           (s/optional-key :allow-invalid?) s/Bool}
+                        (s/optional-key :section-visibility-conditions)  [s/Any]
                         (s/optional-key :options)                        [{:value                            s/Str
                                                                            (s/optional-key :label)           localized-schema/LocalizedStringOptional
                                                                            (s/optional-key :description)     localized-schema/LocalizedStringOptional

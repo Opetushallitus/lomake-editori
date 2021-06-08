@@ -757,13 +757,27 @@
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
 
+(defn- condition-holds? [comparison-operator value compared-value]
+  true)
+
+(defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
+  (reduce
+    (fn [acc-db visibility-condition]
+      (let [{:keys [comparison-operator compared-value]} (:condition visibility-condition)
+            section-name :arvosanat-peruskoulu              ;TODO (:section-name visibility-condition)
+            is-section-visible (not (condition-holds? comparison-operator value compared-value))]
+        (assoc-in acc-db [:application :ui section-name :visible?] is-section-visible)))
+    db
+    section-visibility-conditions))
+
 (reg-event-fx
   :application/set-application-text-field
   (fn [{db :db} [_ field-descriptor value]]
-    ;jos field-descriptorissa on section-visibility-conditions, tee rule run ja piilota osio
-    (prn "SETTING TXT FIELD" value field-descriptor)
-    {:db db
-     :dispatch [:application/set-repeatable-application-field field-descriptor nil nil value]}))
+    (let [visibility-conditions (:section-visibility-conditions field-descriptor)]
+      {:db       (if (seq visibility-conditions)
+                   (hide-sections-based-on-conditions db value visibility-conditions)
+                   db)
+       :dispatch [:application/set-repeatable-application-field field-descriptor nil nil value]})))
 
 (reg-event-fx
   :application/set-repeatable-application-field
