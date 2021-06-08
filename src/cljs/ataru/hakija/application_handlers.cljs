@@ -379,10 +379,9 @@
                                         first
                                         :end)
         time-diff                  (if (some? server-date)
-                                     (- (if (some? server-date)
-                                          (->> (clojure.string/replace server-date " GMT" "")
-                                               (f/parse (f/formatter "EEE, dd MMM yyyy HH:mm:ss"))
-                                               to-long))
+                                     (- (->> (clojure.string/replace server-date " GMT" "")
+                                             (f/parse (f/formatter "EEE, dd MMM yyyy HH:mm:ss"))
+                                             to-long)
                                         (.getTime (js/Date.)))
                                      0)
         form                       (-> (languages->kwd form)
