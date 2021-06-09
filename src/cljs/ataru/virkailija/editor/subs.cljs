@@ -427,6 +427,12 @@
         :content)))
 
 (re-frame/reg-sub
+  :editor/current-editor-sections
+  (fn [db _]
+    (let [content (get-selected-form-content db)]
+      (filter #(= "wrapperElement" (:fieldClass %)) content))))
+
+(re-frame/reg-sub
   :editor/base-education-module-exists?
   (fn [db _]
     (let [content (get-selected-form-content db)]

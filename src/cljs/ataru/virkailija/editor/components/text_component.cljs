@@ -282,16 +282,30 @@
 
 (defn- text-field-section-visibility-conditions-header [{:keys [component-locked?
                                                                 condition
+                                                                section-name
                                                                 option-index
                                                                 path]}]
-  [:div.editor-form__text-field-option-followups-header
-   [text-field-option-condition {:condition    condition
-                                 :option-index option-index
-                                 :path         path}]
-   [:div "Valitse piilotettava osio tästä"]                 ;TODO
-   [remove-option {:disabled?    component-locked?
-                   :option-index option-index
-                   :path         path}]])
+  (let [hideable-sections @(subscribe [:editor/current-editor-sections])]
+    [:div.editor-form__text-field-option-followups-header
+     [text-field-option-condition {:condition    condition
+                                   :option-index option-index
+                                   :path         path}]
+     [:div
+      "Valitse piilotettava osio tästä"
+      [:select
+       {:disabled     component-locked?
+        :on-change    (fn [event]
+                        (dispatch [:editor/lisää-tekstikentän-arvon-perusteella-piilotettavan-osion-nimi
+                                   path
+                                   option-index
+                                   (get-val event)]))
+        :value        (or section-name (first hideable-sections))
+        :data-test-id "tekstikenttä-arvon-perusteella-piilotettavan-osion-nimi"}
+       (for [form-section hideable-sections]
+         [:option {:value (:id form-section)} (-> form-section :label :fi)])]]                 ;TODO use transl
+     [remove-option {:disabled?    component-locked?
+                     :option-index option-index
+                     :path         path}]]))
 
 (defn- text-field-option-followups-header [{:keys [component-locked?
                                                    condition
@@ -365,6 +379,7 @@
            ^{:key (str "visibility-conditions-" index)}
            [text-field-section-visibility-condition-wrapper {:component-locked? component-locked?
                                                              :condition         (:condition visibility-condition)
+                                                             :section-name      (:section-name visibility-condition)
                                                              :option-index      index
                                                              :path              (conj path :section-visibility-conditions)}])
          section-visibility-conditions))]))

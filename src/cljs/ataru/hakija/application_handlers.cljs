@@ -756,10 +756,10 @@
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
 
-(defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
+(defn- hide-sections-based-on-conditions [db value section-visibility-conditions] ;TODO support multiple conditions
   (reduce
     (fn [acc-db visibility-condition]
-      (let [section-name :arvosanat-peruskoulu              ;TODO (:section-name visibility-condition)
+      (let [section-name (-> visibility-condition :section-name keyword)
             is-section-visible (not (option-visibility/non-blank-answer-satisfies-condition? value visibility-condition))]
         (assoc-in acc-db [:application :ui section-name :visible?] is-section-visible)))
     db

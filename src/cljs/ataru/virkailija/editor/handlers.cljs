@@ -118,6 +118,14 @@
           (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
 
 (reg-event-db
+  :editor/lisää-tekstikentän-arvon-perusteella-piilotettavan-osion-nimi
+  (fn [db [_ path option-index value]]
+    (let [section-name-path (current-form-content-path db [path option-index :section-name])]
+      (assoc-in db
+                 section-name-path
+                 value))))
+
+(reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-operaattori
   (fn [db [_ path option-index value]]
     (let [condition-path (current-form-content-path db [path option-index :condition])]
