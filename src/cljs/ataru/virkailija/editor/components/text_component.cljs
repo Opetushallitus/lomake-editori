@@ -290,8 +290,8 @@
      [text-field-option-condition {:condition    condition
                                    :option-index option-index
                                    :path         path}]
-     [:div
-      "Valitse piilotettava osio tästä"
+     [:div.editor-form__text-field-hideable-section-selector
+      [:div.editor-form__text-field-hideable-section-selector--instruction "Valitse piilotettava osio tästä"]
       [:select
        {:disabled     component-locked?
         :on-change    (fn [event]
@@ -324,7 +324,8 @@
 
 (defn- text-field-section-visibility-condition-wrapper [props]
   (when (:condition props)
-    [text-field-section-visibility-conditions-header props]))
+    [:div.editor-form__text-field-option-followups-wrapper
+     [text-field-section-visibility-conditions-header props]]))
 
 (defn- text-field-option-followups-wrapper [{:keys [component-locked?
                                                     condition
