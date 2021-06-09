@@ -756,6 +756,19 @@
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
 
+(defn hide-form-sections-that-have-text-component-visibility-rules [db]
+  (let [section-ids-with-visibility-rules (->> db
+                                               :form
+                                               :content
+                                               (filter #(-> % :section-visibility-conditions seq))
+                                               (map #(-> % :section-visibility-conditions :section-name))
+                                               set)]
+    (reduce
+      (fn [acc-db section-id]
+        (assoc-in acc-db [:application :ui (keyword section-id) :visible?] false))
+      db
+      section-ids-with-visibility-rules)))
+
 (defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
   (let [section-name->visibility-conditions (group-by :section-name section-visibility-conditions)
         distinct-form-sections (keys section-name->visibility-conditions)
