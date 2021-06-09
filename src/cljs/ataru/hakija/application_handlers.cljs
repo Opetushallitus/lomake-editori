@@ -756,14 +756,22 @@
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
 
-(defn- hide-sections-based-on-conditions [db value section-visibility-conditions] ;TODO support multiple conditions
-  (reduce
-    (fn [acc-db visibility-condition]
-      (let [section-name (-> visibility-condition :section-name keyword)
-            is-section-visible (not (option-visibility/non-blank-answer-satisfies-condition? value visibility-condition))]
-        (assoc-in acc-db [:application :ui section-name :visible?] is-section-visible)))
-    db
-    section-visibility-conditions))
+(defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
+  (let [section-name->visibility-conditions (group-by :section-name section-visibility-conditions)
+        distinct-form-sections (keys section-name->visibility-conditions)
+        update-form-section-visibility (fn [db section-name]
+                                         (when section-name
+                                           (let [visibility-conditions (get section-name->visibility-conditions section-name)]
+                                             (assoc-in
+                                               db
+                                               [:application :ui (keyword section-name) :visible?]
+                                               (not
+                                                 (some #(option-visibility/non-blank-answer-satisfies-condition? value %)
+                                                       visibility-conditions))))))]
+    (reduce
+      update-form-section-visibility
+      db
+      distinct-form-sections)))
 
 (reg-event-fx
   :application/set-application-text-field
