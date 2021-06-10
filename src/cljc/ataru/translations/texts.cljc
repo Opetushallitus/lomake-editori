@@ -1875,6 +1875,12 @@
    :lisakysymys-arvon-perusteella-lisaa-ehto        {:fi "Lisää ehto"
                                                      :sv "Lisää ehto"
                                                      :en "EN: Lisää ehto"}
+   :lomakeosion-piilottaminen-arvon-perusteella     {:fi "Toisen lomakeosion piilottaminen arvon perusteella"
+                                                     :sv "SV: Toisen lomakeosion piilottaminen arvon perusteella"
+                                                     :en "EN: Toisen lomakeosion piilottaminen arvon perusteella"}
+   :lomakeosion-piilottaminen-arvon-perusteella-valitse-osio {:fi "Valitse piilotettava osio tästä"
+                                                              :sv "SV: Valitse piilotettava osio tästä"
+                                                              :en "EN: Valitse piilotettava osio tästä"}
    :filter-by-question-answer                       {:fi "Rajaa vastauksen mukaan"
                                                      :sv "Avgränsa enligt svar"
                                                      :en "EN: Rajaa vastauksen mukaan"}

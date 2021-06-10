@@ -103,7 +103,7 @@
          [:label.editor-form__text-field-checkbox-label
           {:for   id
            :class (when disabled? "editor-form__text-field-checkbox-label--disabled")}
-          "Toisen lomakeosion piilottaminen arvon perusteella"] ;@(subscribe [:editor/virkailija-translation :lisakysymys-arvon-perusteella])
+          @(subscribe [:editor/virkailija-translation :lomakeosion-piilottaminen-arvon-perusteella])] ;@(subscribe [:editor/virkailija-translation :lisakysymys-arvon-perusteella])
          (when checked?
            [:div.editor-form__text-field-checkbox-add-condition
             [:span " | "]
@@ -285,13 +285,15 @@
                                                                 section-name
                                                                 option-index
                                                                 path]}]
-  (let [hideable-sections @(subscribe [:editor/current-editor-sections])]
+  (let [hideable-sections @(subscribe [:editor/current-editor-sections])
+        lang @(subscribe [:editor/virkailija-lang])]
     [:div.editor-form__text-field-option-followups-header
      [text-field-option-condition {:condition    condition
                                    :option-index option-index
                                    :path         path}]
      [:div.editor-form__text-field-hideable-section-selector
-      [:div.editor-form__text-field-hideable-section-selector--instruction "Valitse piilotettava osio tästä"]
+      [:div.editor-form__text-field-hideable-section-selector--instruction
+       @(subscribe [:editor/virkailija-translation :lomakeosion-piilottaminen-arvon-perusteella-valitse-osio])]
       [:select
        {:disabled     component-locked?
         :on-change    (fn [event]
@@ -302,7 +304,7 @@
         :value        (or section-name (first hideable-sections))
         :data-test-id "tekstikenttä-arvon-perusteella-piilotettavan-osion-nimi"}
        (for [form-section hideable-sections]
-         [:option {:value (:id form-section)} (-> form-section :label :fi)])]]                 ;TODO use transl
+         [:option {:value (:id form-section)} (-> form-section :label lang)])]]
      [remove-option {:disabled?    component-locked?
                      :option-index option-index
                      :path         path}]]))
