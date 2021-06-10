@@ -480,7 +480,8 @@
         {:db         (assoc db :selection-limited selection-limited)
          :dispatch-n [[:application/hakukohde-query-change (atom "")]
                       [:application/set-page-title]
-                      [:application/validate-hakukohteet]]}
+                      [:application/validate-hakukohteet]
+                      [:application/hide-form-sections-with-text-component-visibility-rules]]}
         (when selection-limited
           {:http {:method  :put
                   :url     (str "/hakemus/api/selection-limit?form-key=" (-> db :form :key))
@@ -756,18 +757,22 @@
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
 
-(defn hide-form-sections-that-have-text-component-visibility-rules [db]
-  (let [section-ids-with-visibility-rules (->> db
-                                               :form
-                                               :content
-                                               (filter #(-> % :section-visibility-conditions seq))
-                                               (map #(-> % :section-visibility-conditions :section-name))
-                                               set)]
-    (reduce
-      (fn [acc-db section-id]
-        (assoc-in acc-db [:application :ui (keyword section-id) :visible?] false))
-      db
-      section-ids-with-visibility-rules)))
+(reg-event-db
+  :application/hide-form-sections-with-text-component-visibility-rules
+  (fn [db _]
+    (let [section-ids-with-visibility-rules (->> db
+                                                 :form
+                                                 :content
+                                                 (filter #(-> % :section-visibility-conditions seq))
+                                                 (map #(-> % :section-visibility-conditions))
+                                                 flatten
+                                                 (map :section-name)
+                                                 set)]
+      (reduce
+        (fn [acc-db section-id]
+          (assoc-in acc-db [:application :ui (keyword section-id) :visible?] false))
+        db
+        section-ids-with-visibility-rules))))
 
 (defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
   (let [section-name->visibility-conditions (group-by :section-name section-visibility-conditions)
