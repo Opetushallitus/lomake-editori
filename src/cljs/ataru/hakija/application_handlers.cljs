@@ -783,9 +783,10 @@
                                              (assoc-in
                                                db
                                                [:application :ui (keyword section-name) :visible?]
-                                               (not
-                                                 (some #(option-visibility/non-blank-answer-satisfies-condition? value %)
-                                                       visibility-conditions))))))]
+                                               (when (seq value)
+                                                 (not
+                                                   (some #(option-visibility/non-blank-answer-satisfies-condition? value %)
+                                                         visibility-conditions)))))))]
     (reduce
       update-form-section-visibility
       db
