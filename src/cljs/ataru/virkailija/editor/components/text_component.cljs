@@ -285,7 +285,7 @@
                                                                 section-name
                                                                 option-index
                                                                 path]}]
-  (let [hideable-sections @(subscribe [:editor/current-editor-sections])
+  (let [hideable-form-sections @(subscribe [:editor/current-editor-sections])
         lang @(subscribe [:editor/virkailija-lang])]
     [:div.editor-form__text-field-option-followups-header
      [text-field-option-condition {:condition    condition
@@ -301,9 +301,11 @@
                                    path
                                    option-index
                                    (get-val event)]))
-        :value        (or section-name (first hideable-sections))
+        :value        (some #(when (= section-name (:id %)) (:id %))
+                            hideable-form-sections)
         :data-test-id "tekstikenttä-arvon-perusteella-piilotettavan-osion-nimi"}
-       (for [form-section hideable-sections]
+       (for [form-section hideable-form-sections]
+         ^{:key (:id form-section)}
          [:option {:value (:id form-section)} (-> form-section :label lang)])]]
      [remove-option {:disabled?    component-locked?
                      :option-index option-index
