@@ -344,7 +344,7 @@
                                           :condition         condition
                                           :followups         followups
                                           :option-index      option-index
-                                          :path              path
+                                          :path              (conj path :options)
                                           :show-followups    show-followups}])
    [followup-question/followup-question-overlay option-index followups path show-followups]])
 
@@ -370,7 +370,7 @@
                                                      :condition         (:condition option)
                                                      :followups         followups
                                                      :option-index      index
-                                                     :path              (conj path :options)
+                                                     :path              path
                                                      :show-followups    show-followups}]))
            options))])))
 
