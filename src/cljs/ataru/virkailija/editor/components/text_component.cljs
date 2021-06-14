@@ -99,7 +99,7 @@
                              (.preventDefault evt)
                              (when (-> evt .-target .-checked)
                                (dispatch [:editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto path]))))
-           :data-test-id "tekstikenttä-valinta-lomakeosion-piilottaminen-arvon-perusteella"}]
+           :data-test-id "tekstikenttä-valinta-lomakeosion-nayttaminen-arvon-perusteella"}]
          [:label.editor-form__text-field-checkbox-label
           {:for   id
            :class (when disabled? "editor-form__text-field-checkbox-label--disabled")}
@@ -329,6 +329,7 @@
 (defn- text-field-section-visibility-condition-wrapper [props]
   (when (:condition props)
     [:div.editor-form__text-field-option-followups-wrapper
+     {:data-test-id "tekstikenttä-lomakeosion-näyttämissääntö"}
      [text-field-section-visibility-conditions-header props]]))
 
 (defn- text-field-option-followups-wrapper [{:keys [component-locked?
