@@ -455,9 +455,9 @@
 (re-frame/reg-sub
   :application/max-hakukohteet
   (fn [db _]
-    (get-in (hakukohteet-field db)
-            [:params :max-hakukohteet]
-            nil)))
+    (-> (hakukohteet-field db)
+        (get-in [:params :max-hakukohteet])
+        (or 3))))
 
 (re-frame/reg-sub
   :application/rajaavat-hakukohderyhmat
@@ -634,3 +634,8 @@
       (let [changed? (fn [answer] (or (not= (:original-value answer) (:value answer))
                                       (some? (some #(= :deleting (:status %)) (:values answer)))))]
            (some? (some changed? (vals answers))))))
+
+(re-frame/reg-sub
+  :application/active-hakukohde-search
+  (fn [db _]
+    (get-in db [:application :active-hakukohde-search])))

@@ -1289,6 +1289,113 @@ th.application__readonly-adjacent--header {
   }
 }
 
+.application__hakukohde-2nd-row {
+  width: 100%;
+  display: flex;
+  margin-bottom: 1rem;
+  // TODO: TÄSSÄ
+}
+
+.application__hakukohde-2nd-row__hakukohde-order {
+  width: 60px;
+  background: #149ecb;
+  color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+
+  &>span {
+    display: block;
+    flex: 1;
+  }
+
+  &>span:nth-child(2) {
+    font-size: 20px;
+  }
+
+  &>span>i {
+    cursor: pointer;
+  }
+
+}
+
+.application__hakukohde-2nd-row__right {
+  width: 100%;
+  background: #f7f8f9;
+  padding: 10px;
+}
+
+.application__hakukohde-2nd-row__top {
+  display: flex;
+
+  &>.application__hakukohde-2nd-row__hakukohde-koulutustyyppi {
+    flex: 1;
+  }
+
+  &>.application__hakukohde-2nd-row__hakukohde {
+    flex: 3;
+    height: 40px;
+  }
+}
+
+.application__hakukohde-2nd-row__hakukohde > .application__form-text-input-in-box {
+  border: solid thin @input-border-gray;
+  border-radius: 2px;
+}
+
+
+.application__hakukohde-2nd-row__hakukohde-hits {
+  background: #fff;
+  position: relative;
+  z-index: 100;
+  border-radius: 4px;
+  box-shadow: @modal-shadow;
+  margin-top: 5px;
+  width: 100%;
+}
+
+.application__search-hit-hakukohde-row-2nd {
+  display: flex;
+  border-bottom: 1px solid @separator-color;
+  padding: 10px;
+
+  &:last-child {
+    border-bottom: 0px;
+    margin-bottom: 0px;
+  }
+
+  &:hover {
+    cursor: pointer;
+    background: @paler-blue;
+  }
+}
+
+.application__hakukohde-2nd-row__selected-hakukohde-row {
+ display: flex;
+  padding: 20px 0;
+}
+
+.application__hakukohde-2nd-row__selected-hakukohde-details {
+  flex: 4;
+}
+
+.application__hakukohde-2nd-row__selected-hakukohde-link {
+  flex: 2;
+  text-align: end;
+}
+
+.application__hakukohde-2nd-row__selected-hakukohde-remove {
+  flex: 1;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: end;
+  padding-right: 10px;
+}
+
+.application__hakukohde-2nd-contents-wrapper {
+  flex-grow: 2;
+}
+
 .application__hakukohde-contents-wrapper {
   flex-grow: 2;
   max-width: 800px;
