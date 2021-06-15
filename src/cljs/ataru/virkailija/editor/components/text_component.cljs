@@ -103,7 +103,7 @@
          [:label.editor-form__text-field-checkbox-label
           {:for   id
            :class (when disabled? "editor-form__text-field-checkbox-label--disabled")}
-          @(subscribe [:editor/virkailija-translation :lomakeosion-piilottaminen-arvon-perusteella])] ;@(subscribe [:editor/virkailija-translation :lisakysymys-arvon-perusteella])
+          @(subscribe [:editor/virkailija-translation :lomakeosion-piilottaminen-arvon-perusteella])]
          (when checked?
            [:div.editor-form__text-field-checkbox-add-condition
             [:span " | "]
