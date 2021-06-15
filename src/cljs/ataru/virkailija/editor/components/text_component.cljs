@@ -285,7 +285,7 @@
                                                                 section-name
                                                                 option-index
                                                                 path]}]
-  (let [hideable-form-sections @(subscribe [:editor/current-editor-sections])
+  (let [hideable-form-sections @(subscribe [:editor/current-lomakeosiot])
         lang @(subscribe [:editor/virkailija-lang])]
     [:div.editor-form__text-field-option-followups-header
      [text-field-option-condition {:condition    condition

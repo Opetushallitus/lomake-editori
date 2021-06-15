@@ -112,7 +112,7 @@
   :editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto
   (fn [db [_ path]]
     (let [text-field-path (current-form-content-path db [path :section-visibility-conditions])
-          hideable-form-sections @(subscribe [:editor/current-editor-sections])
+          hideable-form-sections @(subscribe [:editor/current-lomakeosiot])
           default-hidden-section-name (-> hideable-form-sections first :id)
           section-visibility (text-field-section-visibility-condition default-hidden-section-name)]
       (-> db

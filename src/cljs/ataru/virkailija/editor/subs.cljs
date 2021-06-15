@@ -427,7 +427,7 @@
         :content)))
 
 (re-frame/reg-sub
-  :editor/current-editor-sections
+  :editor/current-lomakeosiot
   (fn [db _]
     (let [content (get-selected-form-content db)]
       (filter #(= "wrapperElement" (:fieldClass %)) content))))
