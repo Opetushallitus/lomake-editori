@@ -151,6 +151,12 @@
                                    (assoc-in [:application :show-hakukohde-search] false))
        :dispatch [:application/validate-hakukohteet]})))
 
+(reg-event-db
+  :application/add-empty-hakukohde-selection
+  [check-schema-interceptor]
+  (fn [db _]
+    (let [empty-hakukohde {:valid false :value nil}]
+      (update-in db [:application :answers :hakukohteet :values] #(conj % empty-hakukohde)))))
 
 (reg-event-fx
   :application/hakukohde-remove-idx
@@ -183,7 +189,7 @@
                                              new-hakukohde-values)
                                    (assoc-in [:application :answers :hakukohteet :value]
                                              (mapv :value new-hakukohde-values))
-                                   (update-in [:application :ui :hakukohteet :deleting] remove-hakukohde-from-deleting hakukohde-oid)
+                                   ;(update-in [:application :ui :hakukohteet :deleting] remove-hakukohde-from-deleting hakukohde-oid)
                                    set-field-visibilities)]
       {:db                 db
        :dispatch [:application/validate-hakukohteet]})))
@@ -192,7 +198,7 @@
   :application/hakukohde-remove-selection
   [check-schema-interceptor]
   (fn [{db :db} [_ hakukohde-oid]]
-    {:db             (update-in db [:application :ui :hakukohteet :deleting] (comp set conj) hakukohde-oid)
+    {:db             db                                     ;(update-in db [:application :ui :hakukohteet :deleting] (comp set conj) hakukohde-oid)
      :dispatch-later [{:ms       500
                        :dispatch [:application/hakukohde-remove hakukohde-oid]}]}))
 
@@ -213,3 +219,28 @@
                               (assoc-in [:application :answers :hakukohteet :value] (mapv :value new-hakukohteet)))]
       {:db                 db
        :dispatch [:application/validate-hakukohteet]})))
+
+(reg-event-db
+  :application/handle-fetch-koulutustyypit
+  [check-schema-interceptor]
+  (fn [db [_ {koulutustyypit-response-body :body}]]
+    (prn "WTF2" koulutustyypit-response-body)
+    (let [relevant-koulutustyyyppi-ids #{"1" "2" "4" "5" "35" "40"};TODO yksi id puuttuu tästä "tutkintokoulutukseen valmistava..."
+          koulutustyypit (filter #(relevant-koulutustyyyppi-ids (:value %))
+                                 koulutustyypit-response-body)]
+      (assoc-in db [:application :koulutustyypit] koulutustyypit))))
+
+(reg-event-fx
+  :application/fetch-koulutustyypit
+  [check-schema-interceptor]
+  (fn [_]
+    (prn "WTF1")
+    {:http {:method    :get
+            :url       "/hakemus/api/koulutustyypit"
+            :handler   [:application/handle-fetch-koulutustyypit]}}))
+
+(reg-event-db
+  :application/toggle-koulutustyyppi-filter
+  [check-schema-interceptor]
+  (fn [db [_ idx koulutustyyppi-value]]
+    (update-in db [:application :hakukohde-koulutustyyppi-filters idx koulutustyyppi-value] not)))

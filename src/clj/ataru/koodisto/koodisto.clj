@@ -60,6 +60,10 @@
        (filter #(= postal-code (:value %)))
        (first)))
 
+(defn get-koulutustyypit
+  [koodisto-cache]
+  (get-koodisto-options koodisto-cache "koulutustyyppi" 2 false))
+
 (defn all-koodisto-values
   [koodisto-cache uri version allow-invalid?]
   (->> (get-koodisto-options koodisto-cache uri version allow-invalid?)

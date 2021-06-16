@@ -1298,7 +1298,7 @@ th.application__readonly-adjacent--header {
 
 .application__hakukohde-2nd-row__hakukohde-order {
   width: 60px;
-  background: #149ecb;
+  background: @link-color;
   color: #fff;
   text-align: center;
   display: flex;
@@ -1343,6 +1343,24 @@ th.application__readonly-adjacent--header {
   border-radius: 2px;
 }
 
+.application__koulutustyypit-filter-wrapper {
+  background: #fff;
+  position: absolute;
+  z-index: 100;
+  border-radius: 4px;
+  box-shadow: @modal-shadow;
+  margin-top: 5px;
+  min-width: 10em;
+}
+
+.application__koulutustyypit-filter-row {
+  padding: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: @paler-blue;
+  }
+}
 
 .application__hakukohde-2nd-row__hakukohde-hits {
   background: #fff;
@@ -1394,6 +1412,11 @@ th.application__readonly-adjacent--header {
 
 .application__hakukohde-2nd-contents-wrapper {
   flex-grow: 2;
+}
+
+.application__hakukohde-2nd-max-amount-reached {
+  color: @pale-blue;
+  font-weight: 600;
 }
 
 .application__hakukohde-contents-wrapper {
@@ -1917,6 +1940,21 @@ th.application__readonly-adjacent--header {
   display: flex;
   flex-direction: column;
   margin-bottom: 14px;
+}
+
+.application_add-hakukohde-row-button {
+  align-items: center;
+  border-radius: 2px;
+  border: none;
+  display: flex;
+  height: 41px;
+  width: 15em;
+  align-self: center;
+  justify-content: space-around;
+  padding: 0 30px;
+  color: @white;
+  background-color: @link-color;
+  cursor: pointer;
 }
 
 .application__send-feedback-button {

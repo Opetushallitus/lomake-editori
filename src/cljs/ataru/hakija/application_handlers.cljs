@@ -475,7 +475,8 @@
         {:db         (assoc db :selection-limited selection-limited)
          :dispatch-n [[:application/hakukohde-query-change (atom "")]
                       [:application/set-page-title]
-                      [:application/validate-hakukohteet]]}
+                      [:application/validate-hakukohteet]
+                      [:application/fetch-koulutustyypit]]}
         (when selection-limited
           {:http {:method  :put
                   :url     (str "/hakemus/api/selection-limit?form-key=" (-> db :form :key))

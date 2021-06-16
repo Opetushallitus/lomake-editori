@@ -639,3 +639,13 @@
   :application/active-hakukohde-search
   (fn [db _]
     (get-in db [:application :active-hakukohde-search])))
+
+(re-frame/reg-sub
+  :application/koulutustyypit
+  (fn [db _]
+    (get-in db [:application :koulutustyypit])))
+
+(re-frame/reg-sub
+  :application/hakukohde-koulutustyypit-filters
+  (fn [db [_ idx]]
+    (get-in db [:application :hakukohde-koulutustyyppi-filters idx])))

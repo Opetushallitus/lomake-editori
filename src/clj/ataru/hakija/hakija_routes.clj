@@ -337,6 +337,10 @@
         (if-let [labels (:label code)]
           (response/ok labels)
           (response/not-found {}))))
+    (api/GET "/koulutustyypit" []
+      :summary "Get cached koulutustyypit from koodisto"
+      (let [codes (koodisto/get-koulutustyypit koodisto-cache)]
+        (response/ok codes)))
     (api/GET "/has-applied" []
       :summary "Check if a person has already applied"
       :query-params [hakuOid :- (api/describe s/Str "Haku OID")
