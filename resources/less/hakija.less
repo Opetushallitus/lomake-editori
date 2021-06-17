@@ -1293,6 +1293,7 @@ th.application__readonly-adjacent--header {
   width: 100%;
   display: flex;
   margin-bottom: 1rem;
+  min-height: 10rem;
   // TODO: TÄSSÄ
 }
 
@@ -1322,11 +1323,14 @@ th.application__readonly-adjacent--header {
 .application__hakukohde-2nd-row__right {
   width: 100%;
   background: #f7f8f9;
-  padding: 10px;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
 }
 
-.application__hakukohde-2nd-row__top {
+.application__hakukohde-2nd-row__bottom {
   display: flex;
+  flex: 1;
 
   &>.application__hakukohde-2nd-row__hakukohde-koulutustyyppi {
     flex: 1;
@@ -1336,6 +1340,11 @@ th.application__readonly-adjacent--header {
     flex: 3;
     height: 40px;
   }
+}
+
+.application__hakukohde-2nd-row__top {
+  flex: 1;
+  text-align: center;
 }
 
 .application__hakukohde-2nd-row__hakukohde > .application__form-text-input-in-box {

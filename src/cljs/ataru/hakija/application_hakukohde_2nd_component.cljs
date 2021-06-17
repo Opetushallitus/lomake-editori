@@ -77,7 +77,7 @@
 
 (defn- selected-hakukohde [idx hakukohde-oid]
   [:div.application__hakukohde-2nd-row__selected-hakukohde
-   (when hakukohde-oid
+   (if hakukohde-oid
      [:div.application__hakukohde-2nd-row__selected-hakukohde-row
       [:div.application__hakukohde-2nd-row__selected-hakukohde-details
        @(subscribe [:application/hakukohde-label hakukohde-oid])]
@@ -88,7 +88,9 @@
       [:div.application__hakukohde-2nd-row__selected-hakukohde-remove
        {:on-click #(dispatch [:application/hakukohde-remove hakukohde-oid])}
        "Poista "
-       [:i.zmdi.zmdi-delete]]])])
+       [:i.zmdi.zmdi-delete]]]
+     [:div
+      "Etsi hakukohteita koulutuksen tai oppilaitoksen perusteella"])])
 
 (defn- hakukohde-priority [idx hakukohde-oid max-hakukohteet]
   (let [increase-disabled (= idx 0)
@@ -109,9 +111,9 @@
   [:div.application__hakukohde-2nd-row
    [hakukohde-priority idx hakukohde-oid max-hakukohteet]
    [:div.application__hakukohde-2nd-row__right
-    [:div.application__hakukohde-2nd-row__bottom
-     [selected-hakukohde idx hakukohde-oid]]
     [:div.application__hakukohde-2nd-row__top
+     [selected-hakukohde idx hakukohde-oid]]
+    [:div.application__hakukohde-2nd-row__bottom
      [koulutustyypit-filter idx]
      [hakukohde-selection idx hakukohde-oid]]
     ]])
