@@ -76,6 +76,7 @@
 
 (defn- parse-hakukohde
   [hakukohde tarjoajat]
+  (prn hakukohde)
   (merge
    {:oid                                                         (:oid hakukohde)
     :hakukohteen-tiedot-url                                      (url-helper/resolve-url :kouta-app.hakukohde (:oid hakukohde))
@@ -88,6 +89,7 @@
     :ryhmaliitokset                                              []
     :hakukelpoisuusvaatimus-uris                                 (:pohjakoulutusvaatimusKoodiUrit hakukohde)
     :ylioppilastutkinto-antaa-hakukelpoisuuden?                  false
+    :koulutustyypit                                              ["tarjonta"]
     :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja? false}
    (if (:kaytetaanHaunAikataulua hakukohde)
      {:hakuaika-id "kouta-hakuaika-id"}

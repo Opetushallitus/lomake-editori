@@ -191,6 +191,7 @@
    :hakukohderyhmat                                                              [s/Str]
    :hakuaika                                                                     Hakuaika
    :koulutukset                                                                  [Koulutus]
+   (s/optional-key :koulutustyypit)                                              [s/Str]
    :applicable-base-educations                                                   [s/Str]
    ;; jyemp
    (s/optional-key :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja?) s/Bool})

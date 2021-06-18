@@ -24,10 +24,10 @@
                                    :on-click #(swap! is-open not)}]
          (when @is-open
            [:div.application__koulutustyypit-filter-wrapper
-            (for [{value :value :as koulutustyyppi} @koulutustyypit]
-              (let [is-selected (get koulutustyypit-filters' value)
-                    on-select #(dispatch [:application/toggle-koulutustyyppi-filter idx value])]
-                ^{:key (str "kt-filter-" value)}
+            (for [{uri :uri :as koulutustyyppi} @koulutustyypit]
+              (let [is-selected (get koulutustyypit-filters' uri)
+                    on-select #(dispatch [:application/toggle-koulutustyyppi-filter idx uri])]
+                ^{:key uri}
                 [koulutustyyppi-filter-row (-> koulutustyyppi :label :fi) is-selected on-select]))])])))) ;TODO i18n
 
 (defn- search-hit-hakukohde-row
@@ -43,7 +43,7 @@
     [:div.application__search-hit-hakukohde-row-2nd
      {:on-mouse-down #(.preventDefault %)
       :on-click      #(do
-                        (dispatch [:application/hakukohde-query-process (atom "") false])
+                        (dispatch [:application/hakukohde-query-process (atom "") idx])
                         (dispatch [:application/set-active-hakukohde-search nil])
                         (dispatch [:application/hakukohde-add-selection hakukohde-oid idx]))}
      [:div.application__search-hit-hakukohde-row--content
@@ -56,15 +56,16 @@
         hakukohde-hits (subscribe [:application/hakukohde-hits])
         active-hakukohde-selection (subscribe [:application/active-hakukohde-search])]
     (fn []
+      (prn "@hakukohde-hits" @hakukohde-hits)
       [:div.application__hakukohde-2nd-row__hakukohde
        [:input.application__form-text-input-in-box
         {
          :on-blur #(do
                      (reset! search-input "")
-                     (dispatch [:application/hakukohde-query-process search-input false])
+                     (dispatch [:application/hakukohde-query-process search-input])
                      (dispatch [:application/set-active-hakukohde-search nil]))
          :on-change   #(do (reset! search-input (.-value (.-target %)))
-                           (dispatch [:application/hakukohde-query-change search-input true])
+                           (dispatch [:application/hakukohde-query-change search-input idx])
                            (dispatch [:application/set-active-hakukohde-search idx]))
          :title       "Otsikko"
          :placeholder "Hakukohde"

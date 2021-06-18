@@ -17,10 +17,10 @@
   [db]
   (update-in db [:application :show-hakukohde-search] not))
 
-(defn query-hakukohteet [hakukohde-query lang virkailija? hakukohteet hakukohteet-field]
+(defn query-hakukohteet [hakukohde-query lang virkailija? tarjonta-hakukohteet hakukohteet-field]
   (let [order-by-hakuaika             (if virkailija?
                                         #{}
-                                        (->> hakukohteet
+                                        (->> tarjonta-hakukohteet
                                              (remove #(:on (:hakuaika %)))
                                              (map :oid)
                                              set))
@@ -54,20 +54,29 @@
 (reg-event-db
   :application/hakukohde-query-process
   [check-schema-interceptor]
-  (fn hakukohde-query-process [db [_ hakukohde-query-atom filter-by-koulutustyyppi?]]
-    ;;TODO: tee logiikka filter-by-koulutustyyppi?
+  (fn hakukohde-query-process [db [_ hakukohde-query-atom idx]]
     (let [hakukohde-query @hakukohde-query-atom
           lang (-> db :form :selected-language)
           virkailija? (some? (get-in db [:application :virkailija-secret]))
           hakukohteet-field (hakukohteet-field db)
-          hakukohteet (get-in db [:form :tarjonta :hakukohteet])
+          tarjonta-hakukohteet (get-in db [:form :tarjonta :hakukohteet])
+          koulutustyyppi-filters (get-in db [:application :hakukohde-koulutustyyppi-filters idx])
+          filtered-koulutustyyppi-values (set (keep (fn [[key value]] (when value key)) koulutustyyppi-filters))
+          filtered-hakukohde-oids (->> tarjonta-hakukohteet
+                                       (filter
+                                         #(some filtered-koulutustyyppi-values (:koulutustyypit %)))
+                                       (map :oid)
+                                       set)
+          _ (prn "filtered-koulutustyyppi-values" filtered-koulutustyyppi-values)
+          _ (prn "tarjonta-hakukohteet kltyyypit" (map :koulutustyypit tarjonta-hakukohteet))
+          _ (prn "filtered-hakukohde-oids" filtered-hakukohde-oids)
+          hakukohteet-options (:options hakukohteet-field)
+          _ (prn "hakukohteet-options" hakukohteet-options)
+          filtered-options (filter #(filtered-hakukohde-oids (:value %)) hakukohteet-options)
+          _ (prn "filtered-options" filtered-options)
           {:keys [hakukohde-query
                   hakukohde-hits
-                  rest-results]} (query-hakukohteet hakukohde-query lang virkailija? hakukohteet hakukohteet-field)]
-      (println "HAKUKOHTEET " (js/console.log (clj->js (first hakukohteet))))
-      (println "HAKUKOHDE HITS " hakukohde-hits)
-      (println "REST RESULTS " rest-results)
-      (println "HAKUKOHDE QUERY " hakukohde-query)
+                  rest-results]} (query-hakukohteet hakukohde-query lang virkailija? tarjonta-hakukohteet hakukohteet-field)]
       (-> db
           (assoc-in [:application :hakukohde-query] hakukohde-query)
           (assoc-in [:application :remaining-hakukohde-search-results] rest-results)
@@ -76,12 +85,12 @@
 (reg-event-fx
   :application/hakukohde-query-change
   [check-schema-interceptor]
-  (fn [{db :db} [_ hakukohde-query-atom filter-by-koulutustyyppi?]]
+  (fn [{db :db} [_ hakukohde-query-atom idx]]
     {:dispatch-debounced {:timeout  500
                           :id       :hakukohde-query
                           :dispatch [:application/hakukohde-query-process
                                      hakukohde-query-atom
-                                     (boolean filter-by-koulutustyyppi?)]}}))
+                                     idx]}}))
 
 (reg-event-db
   :application/show-more-hakukohdes
@@ -224,7 +233,6 @@
   :application/handle-fetch-koulutustyypit
   [check-schema-interceptor]
   (fn [db [_ {koulutustyypit-response-body :body}]]
-    (prn "WTF2" koulutustyypit-response-body)
     (let [relevant-koulutustyyyppi-ids #{"1" "2" "4" "5" "35" "40"};TODO yksi id puuttuu tästä "tutkintokoulutukseen valmistava..."
           koulutustyypit (filter #(relevant-koulutustyyyppi-ids (:value %))
                                  koulutustyypit-response-body)]
