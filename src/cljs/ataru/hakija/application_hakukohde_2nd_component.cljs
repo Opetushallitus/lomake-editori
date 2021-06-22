@@ -1,10 +1,29 @@
 (ns ataru.hakija.application-hakukohde-2nd-component
   (:require [reagent.core :as r]
             [re-frame.core :refer [dispatch subscribe]]
-            [ataru.application-common.components.dropdown-component :as dropdown-component]
             [ataru.application-common.components.button-component :as button-component]))
 
-(defn- koulutustyyppi-filter-row [koulutustyyppi-name is-selected on-change-fn on-blur-fn]
+(defn- hakukohde-info-row [icon title body]
+  [:div.application__hakukohde-2nd__info_row
+   [:div.application__hakukohde-2nd__info_row__icon-wrapper
+    [:div
+     [:i.zmdi.zmdi-hc-2x {:class icon}]]]
+   [:div.application__hakukohde-2nd__info_row__title-wrapper
+    [:h4 title]
+    [:p body]]])
+
+(defn- hakukohde-info []
+  [:div
+   [hakukohde-info-row
+    :zmdi-swap-vertical
+    "Hakukohteiden järjestäminen"
+    "Aseta valitsemasi hakukohteet järjestykseen, jossa toivot tulevasi niihin hyväksytyksi. Harkitse hakukohdejärjestystä tarkoin, sillä se on sitova, etkä voi muuttaa sitä enää hakuajan päättymisen jälkeen."]
+   [hakukohde-info-row
+    :zmdi-swap-vertical
+    "Valituksi tuleminen"
+    "Jos et tule hyväksytyksi ensimmäiseksi asettamaasi hakukohteeseen, tarkistetaan riittääkö valintamenestyksesi seuraavaan asetaamaasi hakukohteeseen. Jos tulet hyväksytyksi johonkin toiseen hakukohteeseen, sitä alemmat hakukohteetu peruuntuvat automattisestii, etkä voi enää tulla valituksi niihin. Ylempiin hakukohteisiin voit kuitenkin vielä tulla myöhemmin valituksi."]])
+
+(defn- koulutustyyppi-filter-row [koulutustyyppi-name is-selected on-change-fn]
   [:div.application__koulutustyypit-filter-row
    {:on-mouse-down #(.preventDefault %)}
    [:input {:id            (str koulutustyyppi-name "-checkbox")
@@ -48,7 +67,7 @@
               (let [is-selected (boolean (koulutustyypit-filters' uri))
                     on-select #(dispatch [:application/toggle-koulutustyyppi-filter idx uri])]
                 ^{:key uri}
-                [koulutustyyppi-filter-row (-> koulutustyyppi :label :fi) is-selected on-select on-blur-fn]))])])))) ;TODO i18n
+                [koulutustyyppi-filter-row (-> koulutustyyppi :label :fi) is-selected on-select]))])])))) ;TODO i18n
 
 (defn- search-hit-hakukohde-row
   [hakukohde-oid idx]
@@ -166,6 +185,7 @@
     [:div.application__wrapper-element
      ;;[hakukohde-selection-header field-descriptor]
      [:div.application__wrapper-contents.application__hakukohde-2nd-contents-wrapper
+      [hakukohde-info]
       [:div.application__form-field
        [:div.application__hakukohde-selected-list
         (for [idx (range hakukohteet-count)]

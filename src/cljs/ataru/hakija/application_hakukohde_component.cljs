@@ -240,9 +240,9 @@
      (when @(subscribe [:application/show-hakukohde-search])
        [hakukohde-selection-search])]]])
 
-(defn hakukohteet-switcher
+(defn hakukohteet-picker
   [field-descriptor idx]
-  (let [toisen-asteen-yhteishaku true]
+  (let [toisen-asteen-yhteishaku @(subscribe [:application/toisen-asteen-yhteishaku?])]
     (if toisen-asteen-yhteishaku
       [hakukohde-2nd/hakukohteet field-descriptor idx]
       [hakukohteet field-descriptor idx])))

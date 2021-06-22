@@ -972,7 +972,7 @@
          {:fieldClass "formField" :fieldType "multipleChoice"} [multiple-choice field-descriptor idx]
          {:fieldClass "formField" :fieldType "singleChoice"} [single-choice-button field-descriptor idx]
          {:fieldClass "formField" :fieldType "attachment"} [attachment field-descriptor idx]
-         {:fieldClass "formField" :fieldType "hakukohteet"} [hakukohde/hakukohteet-switcher field-descriptor idx]
+         {:fieldClass "formField" :fieldType "hakukohteet"} [hakukohde/hakukohteet-picker field-descriptor idx]
          {:fieldClass "pohjakoulutusristiriita" :fieldType "pohjakoulutusristiriita"} [pohjakoulutusristiriita/pohjakoulutusristiriita field-descriptor idx]
          {:fieldClass "infoElement"} [info-element field-descriptor idx]
          {:fieldClass "wrapperElement" :fieldType "adjacentfieldset"} [adjacent-text-fields field-descriptor idx]))

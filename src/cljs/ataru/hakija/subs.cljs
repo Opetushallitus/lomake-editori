@@ -707,3 +707,15 @@
            (filter koulutustyyppi-filter)
            (filter hakuaika-filter)
            (map :oid)))))
+
+(re-frame/reg-sub
+  :application/toisen-asteen-yhteishaku?
+  (fn [db]
+    (let [kohdejoukko-uri (get-in db [:form :tarjonta :kohdejoukko-uri])
+          kohdejoukko (when (some? kohdejoukko-uri)
+                        (-> kohdejoukko-uri
+                            (cstr/split #"#")
+                            first))
+          yhteishaku? (get-in db [:form :tarjonta :yhteishaku])]
+      (and yhteishaku?
+           (= kohdejoukko "haunkohdejoukko_11")))))

@@ -205,6 +205,7 @@
    :prioritize-hakukohteet             s/Bool
    :max-hakukohteet                    (s/maybe s/Int)
    :can-submit-multiple-applications   s/Bool
+   :kohdejoukko-uri                    s/Str
    :yhteishaku                         (s/maybe s/Bool)})
 
 (s/defschema Haku
