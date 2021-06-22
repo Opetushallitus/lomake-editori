@@ -50,6 +50,7 @@
                         :metadata                                        element-metadata-schema/ElementMetadata
                         (s/optional-key :cannot-view)                    s/Bool
                         (s/optional-key :cannot-edit)                    s/Bool
+                        (s/optional-key :per-hakukohde)                  s/Bool
                         (s/optional-key :validators)                     [validator-schema/Validator]
                         (s/optional-key :rules)                          {s/Keyword s/Any}
                         (s/optional-key :blur-rules)                     {s/Keyword s/Any}
@@ -244,6 +245,7 @@
    (s/optional-key :hakuaika-id)                                                 s/Str
    (s/optional-key :hakuajat)                                                    [{:start                org.joda.time.DateTime
                                                                                    (s/optional-key :end) org.joda.time.DateTime}]
+   :koulutustyypit                                                               [s/Str]
    :hakukelpoisuusvaatimus-uris                                                  [s/Str]
    :ylioppilastutkinto-antaa-hakukelpoisuuden?                                   s/Bool
    ;; jyemp

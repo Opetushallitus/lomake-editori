@@ -29,6 +29,7 @@
      :koulutukset                                                 (mapv #(or (get tarjonta-koulutukset %)
                                                                              (throw (new RuntimeException (str "Koulutus " % " not found"))))
                                                                         (:koulutus-oids hakukohde))
+     :koulutustyypit                                              (:koulutustyypit hakukohde)
      :hakuaika                                                    (hakuaika/hakukohteen-hakuaika now haku ohjausparametrit hakukohde)
      :applicable-base-educations                                  (mapcat pohjakoulutukset-by-vaatimus (:hakukelpoisuusvaatimus-uris hakukohde))
      :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja? (boolean (:jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja? hakukohde))}))
@@ -79,6 +80,8 @@
                                                                     pohjakoulutukset-by-vaatimus
                                                                     %)
                                                   tarjonta-hakukohteet)]
+       (println "HAKUKOHTEET 12 " hakukohteet)
+
        (when (not-empty hakukohteet)
          {:tarjonta
           {:hakukohteet                      hakukohteet

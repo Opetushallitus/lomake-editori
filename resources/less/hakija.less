@@ -1297,24 +1297,31 @@ th.application__readonly-adjacent--header {
   // TODO: TÄSSÄ
 }
 
+.application__hakukohde-2nd-row__hakukohde-change-order-hidden {
+  color: @link-color;
+  cursor: initial;
+}
+
 .application__hakukohde-2nd-row__hakukohde-order {
   width: 60px;
   background: @link-color;
   color: #fff;
-  text-align: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   &>span {
     display: block;
-    flex: 1;
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   &>span:nth-child(2) {
     font-size: 20px;
   }
 
-  &>span>i {
+  &>span>i:not(.application__hakukohde-2nd-row__hakukohde-change-order-hidden) {
     cursor: pointer;
   }
 
@@ -1334,6 +1341,15 @@ th.application__readonly-adjacent--header {
 
   &>.application__hakukohde-2nd-row__hakukohde-koulutustyyppi {
     flex: 1;
+    &>div>button {
+      display: inline;
+      vertical-align: middle;
+    }
+    &>div>i {
+      display: inline;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
   }
 
   &>.application__hakukohde-2nd-row__hakukohde {
@@ -1344,7 +1360,6 @@ th.application__readonly-adjacent--header {
 
 .application__hakukohde-2nd-row__top {
   flex: 1;
-  text-align: center;
 }
 
 .application__hakukohde-2nd-row__hakukohde > .application__form-text-input-in-box {
@@ -1363,11 +1378,15 @@ th.application__readonly-adjacent--header {
 }
 
 .application__koulutustyypit-filter-row {
-  padding: 5px;
+  padding: 10px;
   cursor: pointer;
 
   &:hover {
     background-color: @paler-blue;
+  }
+
+  &>input {
+    margin-right: 5px;
   }
 }
 
@@ -1398,12 +1417,8 @@ th.application__readonly-adjacent--header {
 }
 
 .application__hakukohde-2nd-row__selected-hakukohde-row {
- display: flex;
+  display: flex;
   padding: 20px 0;
-}
-
-.application__hakukohde-2nd-row__selected-hakukohde-details {
-  flex: 4;
 }
 
 .application__hakukohde-2nd-row__selected-hakukohde-link {
@@ -1414,9 +1429,12 @@ th.application__readonly-adjacent--header {
 .application__hakukohde-2nd-row__selected-hakukohde-remove {
   flex: 1;
   cursor: pointer;
-  font-weight: 600;
   text-align: end;
   padding-right: 10px;
+
+  &:hover {
+    font-weight: 600;
+  }
 }
 
 .application__hakukohde-2nd-contents-wrapper {
@@ -1426,6 +1444,20 @@ th.application__readonly-adjacent--header {
 .application__hakukohde-2nd-max-amount-reached {
   color: @pale-blue;
   font-weight: 600;
+}
+
+.application-hakukohde-2nd-row__name-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 4;
+
+  &>span:first-child {
+    font-size: larger;
+  }
+
+  &>span {
+    font-weight: bold;
+  }
 }
 
 .application__hakukohde-contents-wrapper {
@@ -1964,6 +1996,10 @@ th.application__readonly-adjacent--header {
   color: @white;
   background-color: @link-color;
   cursor: pointer;
+
+  &:hover {
+    background-color: @control-button-hover-blue;
+  }
 }
 
 .application__send-feedback-button {

@@ -156,13 +156,16 @@
       :summary "Gets form for haku"
       :path-params [haku-oid :- s/Str]
       :query-params [role :- [form-role/FormRole]]
-      (if-let [form-with-tarjonta (form-service/fetch-form-by-haku-oid-str-cached
-                                   form-by-haku-oid-str-cache
-                                   haku-oid
-                                   role)]
-        (response/content-type (response/ok form-with-tarjonta)
-                               "application/json")
-        (response/not-found {})))
+      (try
+        (if-let [form-with-tarjonta (form-service/fetch-form-by-haku-oid-str-cached
+                                      form-by-haku-oid-str-cache
+                                      haku-oid
+                                      role)]
+          (response/content-type (response/ok form-with-tarjonta)
+                                 "application/json")
+          (response/not-found {}))
+        (catch Exception e
+          (println e))))
     (api/GET ["/hakukohde/:hakukohde-oid", :hakukohde-oid #"[0-9\.]+"] []
       :summary "Gets form for hakukohde"
       :path-params [hakukohde-oid :- s/Str]

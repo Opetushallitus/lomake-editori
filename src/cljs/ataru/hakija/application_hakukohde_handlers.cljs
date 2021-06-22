@@ -165,7 +165,7 @@
   [check-schema-interceptor]
   (fn [db _]
     (let [empty-hakukohde {:valid false :value nil}]
-      (update-in db [:application :answers :hakukohteet :values] #(conj % empty-hakukohde)))))
+      (update-in db [:application :answers :hakukohteet :values] #(concat % [empty-hakukohde])))))
 
 (reg-event-fx
   :application/hakukohde-remove-idx
@@ -204,6 +204,25 @@
        :dispatch [:application/validate-hakukohteet]})))
 
 (reg-event-fx
+  :application/hakukohde-remove-by-idx
+  [check-schema-interceptor]
+  (fn [{db :db} [_ idx]]
+    (let [selected-hakukohteet (-> db
+                                   (get-in [:application :answers :hakukohteet :values] [])
+                                   vec) ;; Need to be vec because of subvec
+          new-hakukohde-values (concat
+                                 (subvec selected-hakukohteet 0 idx)
+                                 (subvec selected-hakukohteet (inc idx)))
+          db                   (-> db
+                                   (assoc-in [:application :answers :hakukohteet :values]
+                                             new-hakukohde-values)
+                                   (assoc-in [:application :answers :hakukohteet :value]
+                                             (mapv :value new-hakukohde-values))
+                                   set-field-visibilities)]
+      {:db       db
+       :dispatch [:application/validate-hakukohteet]})))
+
+(reg-event-fx
   :application/hakukohde-remove-selection
   [check-schema-interceptor]
   (fn [{db :db} [_ hakukohde-oid]]
@@ -233,7 +252,7 @@
   :application/handle-fetch-koulutustyypit
   [check-schema-interceptor]
   (fn [db [_ {koulutustyypit-response-body :body}]]
-    (let [relevant-koulutustyyyppi-ids #{"1" "2" "4" "5" "35" "40"};TODO yksi id puuttuu tästä "tutkintokoulutukseen valmistava..."
+    (let [relevant-koulutustyyyppi-ids #{"1" "2" "4" "5" "10" "40"} ;TODO yksi id puuttuu tästä "tutkintokoulutukseen valmentava koulutus erityisopetuksena"
           koulutustyypit (filter #(relevant-koulutustyyyppi-ids (:value %))
                                  koulutustyypit-response-body)]
       (assoc-in db [:application :koulutustyypit] koulutustyypit))))

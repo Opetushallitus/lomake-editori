@@ -4,7 +4,8 @@
     [ataru.application-common.application-field-common :refer [scroll-to-anchor]]
     [ataru.util :as util]
     [ataru.translations.translation-util :as translations]
-    [reagent.core :as r]))
+    [reagent.core :as r]
+    [ataru.hakija.application-hakukohde-2nd-component :as hakukohde-2nd]))
 
 (defn hilighted-text->span [idx {:keys [text hilight]}]
   [(if hilight
@@ -238,3 +239,10 @@
      [select-new-hakukohde-row]
      (when @(subscribe [:application/show-hakukohde-search])
        [hakukohde-selection-search])]]])
+
+(defn hakukohteet-switcher
+  [field-descriptor idx]
+  (let [toisen-asteen-yhteishaku true]
+    (if toisen-asteen-yhteishaku
+      [hakukohde-2nd/hakukohteet field-descriptor idx]
+      [hakukohteet field-descriptor idx])))

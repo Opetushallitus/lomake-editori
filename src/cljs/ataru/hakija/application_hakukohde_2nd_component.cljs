@@ -4,31 +4,51 @@
             [ataru.application-common.components.dropdown-component :as dropdown-component]
             [ataru.application-common.components.button-component :as button-component]))
 
-(defn- koulutustyyppi-filter-row [koulutustyyppi-name is-selected on-change-fn]
+(defn- koulutustyyppi-filter-row [koulutustyyppi-name is-selected on-change-fn on-blur-fn]
   [:div.application__koulutustyypit-filter-row
-   [:input {:id (str koulutustyyppi-name "-checkbox")
-            :type "checkbox"
-            :on-change on-change-fn
-            :checked is-selected}]
-   [:label {:for (str koulutustyyppi-name "-checkbox")}
+   {:on-mouse-down #(.preventDefault %)}
+   [:input {:id            (str koulutustyyppi-name "-checkbox")
+            :aria-label    koulutustyyppi-name
+            :type          "checkbox"
+            :on-change     on-change-fn
+            :checked       is-selected
+            :on-mouse-down #(.preventDefault %)}]
+   [:span {:on-mouse-down #(.preventDefault %)
+           :on-click      on-change-fn
+           :aria-hidden   true}
     koulutustyyppi-name]])
+
+(defn- koulutustyyppi-btn [label is-open? on-click-fn on-blur-fn]
+  [:div
+   [button-component/button {:label label
+                             :on-click on-click-fn
+                             :on-blur on-blur-fn}]
+   (if is-open?
+     [:i.zmdi.zmdi-caret-up]
+     [:i.zmdi.zmdi-caret-down])])
 
 (defn- koulutustyypit-filter [idx]
   (let [is-open (r/atom false)
         koulutustyypit (subscribe [:application/koulutustyypit])
-        koulutustyypit-filters (subscribe [:application/hakukohde-koulutustyypit-filters idx])]
+        koulutustyypit-filters (subscribe [:application/active-koulutustyyppi-filters idx])]
     (fn []
-      (let [koulutustyypit-filters' @koulutustyypit-filters]
+      (let [koulutustyypit-filters' @koulutustyypit-filters
+            label (str
+                    "Rajaa koulutustyypeillä"
+                    (when (not-empty koulutustyypit-filters')
+                      (str " (" (count koulutustyypit-filters') ")")))
+            on-blur-fn #(reset! is-open false)
+            on-click-fn #(swap! is-open not)]
         [:div.application__hakukohde-2nd-row__hakukohde-koulutustyyppi
-         [button-component/button {:label "koulutustyypit (2)"
-                                   :on-click #(swap! is-open not)}]
+         [koulutustyyppi-btn label @is-open on-click-fn on-blur-fn]
          (when @is-open
            [:div.application__koulutustyypit-filter-wrapper
+
             (for [{uri :uri :as koulutustyyppi} @koulutustyypit]
-              (let [is-selected (get koulutustyypit-filters' uri)
+              (let [is-selected (boolean (koulutustyypit-filters' uri))
                     on-select #(dispatch [:application/toggle-koulutustyyppi-filter idx uri])]
                 ^{:key uri}
-                [koulutustyyppi-filter-row (-> koulutustyyppi :label :fi) is-selected on-select]))])])))) ;TODO i18n
+                [koulutustyyppi-filter-row (-> koulutustyyppi :label :fi) is-selected on-select on-blur-fn]))])])))) ;TODO i18n
 
 (defn- search-hit-hakukohde-row
   [hakukohde-oid idx]
@@ -53,7 +73,7 @@
 
 (defn- hakukohde-selection [idx hakukohde]
   (let [search-input (r/atom "")
-        hakukohde-hits (subscribe [:application/hakukohde-hits])
+        hakukohde-hits (subscribe [:application/koulutustyyppi-filtered-hakukohde-hits idx])
         active-hakukohde-selection (subscribe [:application/active-hakukohde-search])]
     (fn []
       (prn "@hakukohde-hits" @hakukohde-hits)
@@ -67,8 +87,7 @@
          :on-change   #(do (reset! search-input (.-value (.-target %)))
                            (dispatch [:application/hakukohde-query-change search-input idx])
                            (dispatch [:application/set-active-hakukohde-search idx]))
-         :title       "Otsikko"
-         :placeholder "Hakukohde"
+         :placeholder "Hae koulutusta tai oppilaitosta"
          :value       @search-input}]
        (when (= idx @active-hakukohde-selection)
          [:div.application__hakukohde-2nd-row__hakukohde-hits
@@ -77,35 +96,37 @@
             [search-hit-hakukohde-row hakukohde-oid idx])])])))
 
 (defn- selected-hakukohde [idx hakukohde-oid]
-  [:div.application__hakukohde-2nd-row__selected-hakukohde
-   (if hakukohde-oid
+    [:div.application__hakukohde-2nd-row__selected-hakukohde
      [:div.application__hakukohde-2nd-row__selected-hakukohde-row
-      [:div.application__hakukohde-2nd-row__selected-hakukohde-details
-       @(subscribe [:application/hakukohde-label hakukohde-oid])]
+
+       [:div.application-hakukohde-2nd-row__name-wrapper
+         [:span @(subscribe [:application/hakukohde-name-label-by-oid hakukohde-oid])]
+         [:span @(subscribe [:application/hakukohde-tarjoaja-name-label-by-oid hakukohde-oid])]]
       [:div.application__hakukohde-2nd-row__selected-hakukohde-link
-       [:a {:href "/asdf"}
-        [:i.zmdi.zmdi-open-in-new]
-        " Lue lisätietoa"]]
+       (when hakukohde-oid
+         [:a {:href "/asdf"}
+          [:i.zmdi.zmdi-open-in-new]
+          " Lue lisätietoa"])]
       [:div.application__hakukohde-2nd-row__selected-hakukohde-remove
-       {:on-click #(dispatch [:application/hakukohde-remove hakukohde-oid])}
+       {:on-click #(dispatch [:application/hakukohde-remove-by-idx idx])}
        "Poista "
-       [:i.zmdi.zmdi-delete]]]
-     [:div
-      "Etsi hakukohteita koulutuksen tai oppilaitoksen perusteella"])])
+       [:i.zmdi.zmdi-delete]]]])
 
 (defn- hakukohde-priority [idx hakukohde-oid max-hakukohteet]
   (let [increase-disabled (= idx 0)
         decrease-disabled (= idx (dec max-hakukohteet))]
     [:div.application__hakukohde-2nd-row__hakukohde-order
      [:span
-      (when-not increase-disabled
-        [:i.zmdi.zmdi-caret-up.zmdi-hc-2x
-         {:on-click #(dispatch [:application/change-hakukohde-priority hakukohde-oid -1])}])]
+      [:i.zmdi.zmdi-caret-up.zmdi-hc-2x
+       (if increase-disabled
+         {:class "application__hakukohde-2nd-row__hakukohde-change-order-hidden"}
+         {:on-click #(dispatch [:application/change-hakukohde-priority hakukohde-oid -1])})]]
      [:span (inc idx)]
      [:span
-      (when-not decrease-disabled
-        [:i.zmdi.zmdi-caret-down.zmdi-hc-2x
-         {:on-click #(dispatch [:application/change-hakukohde-priority hakukohde-oid 1])}])]]))
+      [:i.zmdi.zmdi-caret-down.zmdi-hc-2x
+       (if decrease-disabled
+         {:class "application__hakukohde-2nd-row__hakukohde-change-order-hidden"}
+         {:on-click #(dispatch [:application/change-hakukohde-priority hakukohde-oid 1])})]]]))
 
 (defn- hakukohde-row [idx hakukohde-oid max-hakukohteet]
   (println "hakukohde-row " idx hakukohde-oid)

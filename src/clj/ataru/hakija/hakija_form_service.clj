@@ -288,7 +288,7 @@
                                               (map keyword roles))]
         (try
           (form-coercer form)
-          (prn "COERCED FORM " (form-coercer form))
+          ;;(prn "COERCED FORM " (form-coercer form))
           (catch Exception e
             (prn "COERCE FAIL " e)))
         (json/generate-string (form-coercer form)))))
