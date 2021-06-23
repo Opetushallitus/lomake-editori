@@ -238,8 +238,6 @@
   cache/Cache
 
   (get-from [this key]
-    (prn "CACHE KEY " key)
-    ;;(prn "redis res " (redis-get this key))
     (if-let [[value ttl-left] (redis-get this key)]
       (do (when (and (some? refresh-after-ms)
                      (< refresh-after-ms (- ttl-ms ttl-left)))

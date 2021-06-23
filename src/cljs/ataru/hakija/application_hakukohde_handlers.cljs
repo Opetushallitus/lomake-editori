@@ -60,20 +60,6 @@
           virkailija? (some? (get-in db [:application :virkailija-secret]))
           hakukohteet-field (hakukohteet-field db)
           tarjonta-hakukohteet (get-in db [:form :tarjonta :hakukohteet])
-          koulutustyyppi-filters (get-in db [:application :hakukohde-koulutustyyppi-filters idx])
-          filtered-koulutustyyppi-values (set (keep (fn [[key value]] (when value key)) koulutustyyppi-filters))
-          filtered-hakukohde-oids (->> tarjonta-hakukohteet
-                                       (filter
-                                         #(some filtered-koulutustyyppi-values (:koulutustyypit %)))
-                                       (map :oid)
-                                       set)
-          _ (prn "filtered-koulutustyyppi-values" filtered-koulutustyyppi-values)
-          _ (prn "tarjonta-hakukohteet kltyyypit" (map :koulutustyypit tarjonta-hakukohteet))
-          _ (prn "filtered-hakukohde-oids" filtered-hakukohde-oids)
-          hakukohteet-options (:options hakukohteet-field)
-          _ (prn "hakukohteet-options" hakukohteet-options)
-          filtered-options (filter #(filtered-hakukohde-oids (:value %)) hakukohteet-options)
-          _ (prn "filtered-options" filtered-options)
           {:keys [hakukohde-query
                   hakukohde-hits
                   rest-results]} (query-hakukohteet hakukohde-query lang virkailija? tarjonta-hakukohteet hakukohteet-field)]
@@ -190,15 +176,13 @@
   :application/hakukohde-remove
   [check-schema-interceptor]
   (fn [{db :db} [_ hakukohde-oid]]
-    (let [field-descriptor     (hakukohteet-field db)
-          selected-hakukohteet (get-in db [:application :answers :hakukohteet :values] [])
+    (let [selected-hakukohteet (get-in db [:application :answers :hakukohteet :values] [])
           new-hakukohde-values (vec (remove #(= hakukohde-oid (:value %)) selected-hakukohteet))
           db                   (-> db
                                    (assoc-in [:application :answers :hakukohteet :values]
                                              new-hakukohde-values)
                                    (assoc-in [:application :answers :hakukohteet :value]
                                              (mapv :value new-hakukohde-values))
-                                   ;(update-in [:application :ui :hakukohteet :deleting] remove-hakukohde-from-deleting hakukohde-oid)
                                    set-field-visibilities)]
       {:db                 db
        :dispatch [:application/validate-hakukohteet]})))
@@ -261,7 +245,6 @@
   :application/fetch-koulutustyypit
   [check-schema-interceptor]
   (fn [_]
-    (prn "WTF1")
     {:http {:method    :get
             :url       "/hakemus/api/koulutustyypit"
             :handler   [:application/handle-fetch-koulutustyypit]}}))
