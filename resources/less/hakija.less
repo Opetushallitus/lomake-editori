@@ -1482,15 +1482,15 @@ th.application__readonly-adjacent--header {
 }
 
 .application__hakukohde-2nd-row__selected-hakukohde-remove {
-  flex: 2;
+  flex: 1;
   cursor: pointer;
-  text-align: end;
+  text-align: center;
   margin: 3px;
-  padding-right: 10px;
   @media screen and (max-width: @desktop-content-width) {
     text-align: start;
     font-size: 0.8em;
     font-weight: 550;
+    padding-right: 0;
   }
 
   &:hover {
@@ -1512,12 +1512,18 @@ th.application__readonly-adjacent--header {
   flex-direction: column;
   flex: 4;
   margin: 4px;
+  justify-content: center;
+
+  @media screen and (max-width: @desktop-content-width) {
+    flex: 6;
+  }
 
   &>span:first-child {
     padding: 1px;
     font-size: larger;
     @media screen and (max-width: @desktop-content-width) {
-      font-size: large;
+      font-size: 0.9em;
+      font-weight: bold;
     }
   }
 
@@ -1525,8 +1531,8 @@ th.application__readonly-adjacent--header {
     padding: 1px;
     font-weight: bold;
     @media screen and (max-width: @desktop-content-width) {
-      font-size: small;
-      font-weight: bold;
+      font-size: 0.9em;
+      font-weight: normal;
     }
   }
 }
