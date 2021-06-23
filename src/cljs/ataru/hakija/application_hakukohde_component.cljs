@@ -243,6 +243,6 @@
 (defn hakukohteet-picker
   [field-descriptor idx]
   (let [toisen-asteen-yhteishaku @(subscribe [:application/toisen-asteen-yhteishaku?])]
-    (if-not toisen-asteen-yhteishaku
+    (if-not toisen-asteen-yhteishaku                        ;TODO devaamista varten, oikeasti if
       [hakukohde-2nd/hakukohteet field-descriptor idx]
       [hakukohteet field-descriptor idx])))
