@@ -1294,7 +1294,9 @@ th.application__readonly-adjacent--header {
   display: flex;
   margin-bottom: 1rem;
   min-height: 10rem;
-  // TODO: TÄSSÄ
+  @media screen and (max-width: @desktop-content-width) {
+    width: 130%;
+  }
 }
 
 .application__hakukohde-2nd-row__hakukohde-change-order-hidden {
@@ -1330,7 +1332,7 @@ th.application__readonly-adjacent--header {
 .application__hakukohde-2nd-row__right {
   width: 100%;
   background: #f7f8f9;
-  padding: 0 10px;
+  padding: 0 10px 10px 10px;
   display: flex;
   flex-direction: column;
 }
@@ -1338,9 +1340,14 @@ th.application__readonly-adjacent--header {
 .application__hakukohde-2nd-row__bottom {
   display: flex;
   flex: 1;
+  @media screen and (max-width: @desktop-content-width) {
+    flex-direction: column;
+  }
 
   &>.application__hakukohde-2nd-row__hakukohde-koulutustyyppi {
     flex: 1;
+    margin: 5px;
+
     &>div>button {
       display: inline;
       vertical-align: middle;
@@ -1392,12 +1399,22 @@ th.application__readonly-adjacent--header {
 
 .application__hakukohde-2nd-row__hakukohde-hits {
   background: #fff;
-  position: relative;
+  position: absolute;
   z-index: 100;
   border-radius: 4px;
   box-shadow: @modal-shadow;
   margin-top: 5px;
-  width: 100%;
+  width: 670px;
+  max-height: 11em;
+  overflow-y: scroll;
+
+  @media screen and (max-width: @desktop-content-width) {
+    width: 350px;
+  }
+
+  @media screen and (max-width: 400px) {
+    width: 270px;
+  }
 }
 
 .application__search-hit-hakukohde-row-2nd {
@@ -1445,16 +1462,36 @@ th.application__readonly-adjacent--header {
   padding: 20px 0;
 }
 
+.application__hakukohde-2nd-row__selected-hakukohde-utils-wrapper {
+  flex: 2;
+  display: flex;
+  @media screen and (max-width: @desktop-content-width) {
+    flex-direction: column;
+  }
+}
+
 .application__hakukohde-2nd-row__selected-hakukohde-link {
   flex: 2;
   text-align: end;
+  margin:3px;
+  @media screen and (max-width: @desktop-content-width) {
+    text-align: start;
+    font-size: 0.8em;
+    font-weight: 550;
+  }
 }
 
 .application__hakukohde-2nd-row__selected-hakukohde-remove {
-  flex: 1;
+  flex: 2;
   cursor: pointer;
   text-align: end;
+  margin: 3px;
   padding-right: 10px;
+  @media screen and (max-width: @desktop-content-width) {
+    text-align: start;
+    font-size: 0.8em;
+    font-weight: 550;
+  }
 
   &:hover {
     font-weight: 600;
@@ -1474,13 +1511,23 @@ th.application__readonly-adjacent--header {
   display: flex;
   flex-direction: column;
   flex: 4;
+  margin: 4px;
 
   &>span:first-child {
+    padding: 1px;
     font-size: larger;
+    @media screen and (max-width: @desktop-content-width) {
+      font-size: large;
+    }
   }
 
   &>span {
+    padding: 1px;
     font-weight: bold;
+    @media screen and (max-width: @desktop-content-width) {
+      font-size: small;
+      font-weight: bold;
+    }
   }
 }
 

@@ -3,26 +3,6 @@
             [re-frame.core :refer [dispatch subscribe]]
             [ataru.application-common.components.button-component :as button-component]))
 
-(defn- hakukohde-info-row [icon title body]
-  [:div.application__hakukohde-2nd__info_row
-   [:div.application__hakukohde-2nd__info_row__icon-wrapper
-    [:div
-     [:i.zmdi.zmdi-hc-2x {:class icon}]]]
-   [:div.application__hakukohde-2nd__info_row__title-wrapper
-    [:h4 title]
-    [:p body]]])
-
-(defn- hakukohde-info []
-  [:div
-   [hakukohde-info-row
-    :zmdi-swap-vertical
-    "Hakukohteiden järjestäminen"
-    "Aseta valitsemasi hakukohteet järjestykseen, jossa toivot tulevasi niihin hyväksytyksi. Harkitse hakukohdejärjestystä tarkoin, sillä se on sitova, etkä voi muuttaa sitä enää hakuajan päättymisen jälkeen."]
-   [hakukohde-info-row
-    :zmdi-swap-vertical
-    "Valituksi tuleminen"
-    "Jos et tule hyväksytyksi ensimmäiseksi asettamaasi hakukohteeseen, tarkistetaan riittääkö valintamenestyksesi seuraavaan asetaamaasi hakukohteeseen. Jos tulet hyväksytyksi johonkin toiseen hakukohteeseen, sitä alemmat hakukohteetu peruuntuvat automattisestii, etkä voi enää tulla valituksi niihin. Ylempiin hakukohteisiin voit kuitenkin vielä tulla myöhemmin valituksi."]])
-
 (defn- koulutustyyppi-filter-row [koulutustyyppi-name is-selected on-change-fn]
   [:div.application__koulutustyypit-filter-row
    {:on-mouse-down #(.preventDefault %)}
@@ -115,21 +95,24 @@
             [search-hit-hakukohde-row hakukohde-oid idx])])])))
 
 (defn- selected-hakukohde [idx hakukohde-oid]
+  (let [top-label @(subscribe [:application/hakukohde-name-label-by-oid hakukohde-oid])
+        bottom-label @(subscribe [:application/hakukohde-tarjoaja-name-label-by-oid hakukohde-oid])]
     [:div.application__hakukohde-2nd-row__selected-hakukohde
      [:div.application__hakukohde-2nd-row__selected-hakukohde-row
 
-       [:div.application-hakukohde-2nd-row__name-wrapper
-         [:span @(subscribe [:application/hakukohde-name-label-by-oid hakukohde-oid])]
-         [:span @(subscribe [:application/hakukohde-tarjoaja-name-label-by-oid hakukohde-oid])]]
-      [:div.application__hakukohde-2nd-row__selected-hakukohde-link
-       (when hakukohde-oid
-         [:a {:href "/asdf"}
-          [:i.zmdi.zmdi-open-in-new]
-          " Lue lisätietoa"])]
-      [:div.application__hakukohde-2nd-row__selected-hakukohde-remove
-       {:on-click #(dispatch [:application/hakukohde-remove-by-idx idx])}
-       "Poista "
-       [:i.zmdi.zmdi-delete]]]])
+      [:div.application-hakukohde-2nd-row__name-wrapper
+       [:span @(subscribe [:application/hakukohde-name-label-by-oid hakukohde-oid])]
+       [:span @(subscribe [:application/hakukohde-tarjoaja-name-label-by-oid hakukohde-oid])]]
+      [:div.application__hakukohde-2nd-row__selected-hakukohde-utils-wrapper
+       [:div.application__hakukohde-2nd-row__selected-hakukohde-link
+        (when hakukohde-oid
+          [:a {:href "/asdf"}
+           [:i.zmdi.zmdi-open-in-new]
+           " Lue lisätietoa"])]
+       [:div.application__hakukohde-2nd-row__selected-hakukohde-remove
+        {:on-click #(dispatch [:application/hakukohde-remove-by-idx idx])}
+        "Poista "
+        [:i.zmdi.zmdi-delete]]]]]))
 
 (defn- hakukohde-priority [idx hakukohde-oid max-hakukohteet]
   (let [increase-disabled (= idx 0)
@@ -185,7 +168,6 @@
     [:div.application__wrapper-element
      ;;[hakukohde-selection-header field-descriptor]
      [:div.application__wrapper-contents.application__hakukohde-2nd-contents-wrapper
-      [hakukohde-info]
       [:div.application__form-field
        [:div.application__hakukohde-selected-list
         (for [idx (range hakukohteet-count)]
