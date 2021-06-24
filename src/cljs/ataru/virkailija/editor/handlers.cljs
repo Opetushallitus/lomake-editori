@@ -1104,7 +1104,7 @@
   [previews]
   (let [contents              (->> previews
                                    vals
-                                   (map #(select-keys % [:lang :content :content-ending :subject])))
+                                   (map #(select-keys % [:lang :content :content-ending :subject :signature])))
         contents-changed      @(subscribe [:editor/email-templates-altered])
         only-changed-contents (filter #(get contents-changed (:lang %)) contents)]
     only-changed-contents))

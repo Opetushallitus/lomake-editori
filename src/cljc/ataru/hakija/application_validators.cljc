@@ -1,6 +1,6 @@
 (ns ataru.hakija.application-validators
-  #?(:cljs (:require-macros [cljs.core.async.macros :as asyncm]))
-  (:require [clojure.string]
+  (:require [clojure.set]
+            [clojure.string]
             [ataru.email :as email]
             [ataru.ssn :as ssn]
             [ataru.translations.texts :as texts]
@@ -9,13 +9,10 @@
             [ataru.koodisto.koodisto-codes :refer [finland-country-code]]
             #?(:clj  [clojure.core.async :as async]
                :cljs [cljs.core.async :as async])
-            #?(:clj  [clojure.core.async :as asyncm])
             #?(:clj  [clj-time.core :as c]
                :cljs [cljs-time.core :as c])
             #?(:clj  [clj-time.format :as f]
-               :cljs [cljs-time.format :as f])
-            #?(:clj  [clojure.core.match :refer [match]]
-               :cljs [cljs.core.match :refer-macros [match]])))
+               :cljs [cljs-time.format :as f])))
 
 (defn ^:private required?
   [{:keys [value]}]
@@ -70,7 +67,7 @@
         preferred-name (:preferred-name answers-by-key)
         original-value (get-in answers-by-key [(keyword (:id field-descriptor)) :original-value])
         modifying?     (some? original-value)]
-    (asyncm/go
+    (async/go
       (cond (not (ssn/ssn? value))
             [false []]
             (and (not multiple?)
@@ -82,7 +79,7 @@
             [true []]))))
 
 (defn- email?
-  [{:keys [has-applied value answers-by-key field-descriptor]}]
+  [{:keys [has-applied answers-by-key field-descriptor]}]
   (let [multiple?      (get-in field-descriptor [:params :can-submit-multiple-applications] true)
         haku-oid       (get-in field-descriptor [:params :haku-oid])
         this-answer    (get answers-by-key (keyword (:id field-descriptor)))
@@ -91,7 +88,7 @@
         modifying?     (some? original-value)
         value          (:value this-answer)
         verify-value   (:verify this-answer)]
-    (asyncm/go
+    (async/go
       (cond (or (not (email/email? value))
                 (and verify-value
                      (not= verify-value value)))
@@ -108,11 +105,16 @@
             :else
             [true []]))))
 
+(defn- email-simple?
+  [{:keys [value]}]
+  (if (clojure.string/blank? value)
+    true
+    (email/email? value)))
+
 (defn- selection-limit?
-  [{:keys [try-selection answers-by-key value field-descriptor]}]
-  (let [id (:id field-descriptor)
-        {original-value :original-value} ((keyword id) answers-by-key)]
-    (asyncm/go
+  [{:keys [try-selection value field-descriptor]}]
+  (let [id (:id field-descriptor)]
+    (async/go
       (async/<! (try-selection id value)))))
 
 (def ^:private postal-code-pattern #"^\d{5}$")
@@ -140,7 +142,8 @@
      (let [formatter (f/formatter "dd.MM.YYYY" (c/time-zone-for-id "Europe/Helsinki"))]
        (fn [d]
          (try
-           (f/parse formatter d)
+           (when (re-matches finnish-date-pattern d)
+             (f/parse formatter d))
            (catch Exception _ nil)))))
    :cljs
    (def parse-date
@@ -286,7 +289,8 @@
                       :home-town                      home-town?
                       :city                           city?
                       :hakukohteet                    hakukohteet?
-                      :numeric                        numeric?})
+                      :numeric                        numeric?
+                      :email-simple                   email-simple?})
 
 (def async-validators {:selection-limit selection-limit?
                        :ssn ssn?
@@ -296,7 +300,7 @@
   [{:keys [validator] :as params}]
   (if-let [pure-validator ((keyword validator) pure-validators)]
     (let [valid? (pure-validator params)]
-      (asyncm/go [valid? []]))
+      (async/go [valid? []]))
     (if-let [async-validator ((keyword validator) async-validators)]
       (async-validator params)
-      (asyncm/go [false []]))))
+      (async/go [false []]))))

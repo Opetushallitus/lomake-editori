@@ -58,15 +58,24 @@
           </td>
         </tr>
       {% endif %}
+      {% if application-url|not-empty %}
       <tr>
         <td style="padding-left: 20px; padding-top: 20px;">
           <a style="color: #0093C4;" href="{{application-url|safe}}" target="_blank">{{application-url|safe}}</a>
         </td>
       </tr>
+      {% endif %}
       {% if content-ending|not-empty %}
       <tr>
         <td style="padding-left: 20px; padding-top: 20px;">
           {{content-ending|safe}}
+        </td>
+      </tr>
+      {% endif %}
+      {% if signature|not-empty %}
+      <tr>
+        <td style="padding-left: 20px; padding-top: 20px;">
+          {{signature|safe}}
         </td>
       </tr>
       {% endif %}

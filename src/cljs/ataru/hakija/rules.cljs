@@ -4,7 +4,7 @@
             [ataru.preferred-name :as pn]
             [ataru.koodisto.koodisto-codes :refer [finland-country-code]]
             [ataru.hakija.arvosanat.valinnainen-oppiaine-koodi :as vok]
-            clojure.string
+            [ataru.date :as date]
             [clojure.string :as string])
   (:require-macros [cljs.core.match :refer [match]]))
 
@@ -15,7 +15,7 @@
 
 (defn- blank-value? [value]
   (or (and (string? value)
-           (clojure.string/blank? value))
+           (string/blank? value))
       (and (vector? value)
            (-> value first blank-value?))))
 
@@ -177,6 +177,34 @@
       (hide-field db :birthplace)
       (show-field db :birthplace))))
 
+(defn- guardian-contact
+  ^{:dependencies [:birth-date]}
+  [db]
+  (let [fields [:guardian-contact-information
+                :guardian-contact-minor
+                :guardian-contact-minor-secondary
+                :guardian-name
+                :guardian-phone
+                :guardian-email
+                :guardian-name-secondary
+                :guardian-phone-secondary
+                :guardian-email-secondary]
+        editing? (get-in db [:application :editing?])
+        minor? (if editing?
+                 (get-in db [:application :person :minor])
+                 (date/minor? (get-in db [:application :answers :birth-date :value])))
+        all-empty (every? (fn [field]
+                            (let [value (get-in db [:application :answers field :value])]
+                              (cond
+                                (vector? value) (every? string/blank? value)
+                                :else (string/blank? value)))) fields)]
+    (if (or (not all-empty) minor?)
+      (reduce (fn [db' field] (show-field db' field true)) db fields)
+      (reduce (fn [db' field] (hide-field db' field)) db fields))))
+
+(defn- toggle-birth-date-based-fields [db]
+  (guardian-contact db))
+
 (defn swap-ssn-birthdate-based-on-nationality
   [db _]
   (-> db
@@ -185,7 +213,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- update-gender-and-birth-date-based-on-ssn
   [db _]
@@ -195,7 +224,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- toggle-ssn-based-fields
   [db _]
@@ -205,7 +235,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date-and-gender))
+      birth-date-and-gender
+      toggle-birth-date-based-fields))
 
 (defn- toggle-ssn-based-fields-without-gender
   [db _]
@@ -215,7 +246,8 @@
       passport-number
       national-id-number
       birthplace
-      birth-date))
+      birth-date
+      toggle-birth-date-based-fields))
 
 (defn- postal-office
   ^{:dependencies [:country-of-residence :postal-code]}
@@ -223,7 +255,7 @@
   (let [answers     (-> db :application :answers)
         country     (-> answers :country-of-residence :value)
         is-finland? (or (= country finland-country-code)
-                        (clojure.string/blank? country))
+                        (string/blank? country))
         postal-code (-> answers :postal-code)
         auto-input? (and is-finland?
                          (= 5 (count (:value postal-code))))]
@@ -247,7 +279,7 @@
   [db]
   (let [country     (get-in db [:application :answers :country-of-residence :value])
         is-finland? (or (= country finland-country-code)
-                        (clojure.string/blank? country))]
+                        (string/blank? country))]
     (if is-finland?
       (-> db
           (show-field :home-town)
@@ -263,10 +295,10 @@
 (defn- prefill-preferred-first-name
   [db _]
   (let [answers        (-> db :application :answers)
-        first-name     (-> answers :first-name :value (clojure.string/trim) (clojure.string/split #" ") first)
+        first-name     (-> answers :first-name :value (string/trim) (string/split #" ") first)
         preferred-name (-> answers :preferred-name :value)]
     (cond
-      (and first-name (clojure.string/blank? preferred-name))
+      (and first-name (string/blank? preferred-name))
       (-> db
           (update-in [:application :answers :preferred-name] merge
                      {:value first-name
@@ -275,7 +307,7 @@
                      {:valid true
                       :value first-name}))
 
-      (and first-name (not (clojure.string/blank? preferred-name)))
+      (and first-name (not (string/blank? preferred-name)))
       (-> db
           (update-in [:application :answers :preferred-name] merge
                      {:valid (pn/main-first-name? {:value preferred-name :answers-by-key answers})})
@@ -401,6 +433,8 @@
     select-postal-office-based-on-postal-code
     :toggle-ssn-based-fields
     toggle-ssn-based-fields
+    :toggle-birthdate-based-fields
+    toggle-birth-date-based-fields
     :toggle-ssn-based-fields-without-gender
     toggle-ssn-based-fields-without-gender
     :change-country-of-residence

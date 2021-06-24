@@ -389,7 +389,8 @@
    (s/optional-key :birth-date)  s/Str
    (s/optional-key :gender)      s/Str
    (s/optional-key :language)    s/Str
-   (s/optional-key :ssn)         s/Str})
+   (s/optional-key :ssn)         s/Str
+   (s/optional-key :minor)       s/Bool})
 
 (s/defschema ApplicationWithPerson
   (-> Application
@@ -669,6 +670,7 @@
 (s/defschema EmailTemplate {:lang           (s/enum "fi" "sv" "en")
                             :content        s/Str
                             :content-ending s/Str
+                            :signature      s/Str
                             :subject        (s/constrained s/Str (comp not string/blank?))})
 
 (s/defschema Sort

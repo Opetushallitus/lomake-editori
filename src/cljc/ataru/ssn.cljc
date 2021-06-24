@@ -1,6 +1,7 @@
 (ns ataru.ssn
   (:require #?(:clj  [clj-time.core :as c]
-               :cljs [cljs-time.core :as c])))
+               :cljs [cljs-time.core :as c])
+            [clojure.string :as string]))
 
 (def ^:private ssn-pattern #"^(\d{2})(\d{2})(\d{2})([-|A])(\d{3})([0-9a-zA-Z])$")
 
@@ -67,3 +68,19 @@
         (and
           (valid-year? (+ 2000 (->int year)) century)
           (= (clojure.string/upper-case check) check-char))))))
+
+(defn- parse-birth-date-from-ssn
+  [ssn]
+  (let [century-sign (subs ssn 6 7)
+        day          (subs ssn 0 2)
+        month        (subs ssn 2 4)
+        year         (subs ssn 4 6)
+        century      (case century-sign
+                       "+" "18"
+                       "-" "19"
+                       "A" "20")]
+    (str day "." month "." century year)))
+
+(defn ssn->birth-date [ssn]
+  (when-not (string/blank? ssn)
+    (parse-birth-date-from-ssn ssn)))
