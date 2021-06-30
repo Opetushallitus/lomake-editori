@@ -2106,3 +2106,35 @@ th.application__readonly-adjacent--header {
 .toggle-switch__label {
   .semibold;
 }
+
+@per-question-padding: 1.5rem 0 0.4rem;
+@per-question-border: 1px solid @pale-blue;
+
+.per-question-wrapper {
+  border-top: @per-question-border;
+  border-bottom: @per-question-border;
+  padding: @per-question-padding;
+  .application__question_hakukohde_names_container {
+    display: none;
+  }
+  .application__form-field-label--duplicate-question {
+    span {
+      font-weight: normal;
+    }
+  }
+}
+
+.readonly__per-question-wrapper {
+  border-top: @per-question-border;
+  border-bottom: @per-question-border;
+  padding: @per-question-padding;
+  .application__form-field-label {
+    display: none;
+  }
+  .application__form-field__original-question {
+    display: block;
+  }
+  section span {
+    font-size: 14px;
+  }
+}

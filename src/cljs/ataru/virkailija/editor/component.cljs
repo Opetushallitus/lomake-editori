@@ -1,29 +1,30 @@
 (ns ataru.virkailija.editor.component
   (:require
-   [ataru.application-common.application-field-common :refer [copy-link]]
-   [ataru.cljs-util :as util]
-   [ataru.koodisto.koodisto-whitelist :as koodisto-whitelist]
-   [ataru.virkailija.editor.components.followup-question :as followup-question]
-   [ataru.component-data.person-info-module :as pm]
-   [ataru.virkailija.editor.components.toolbar :as toolbar]
-   [ataru.virkailija.editor.components.drag-n-drop-spacer :as dnd]
-   [cljs.core.match :refer-macros [match]]
-   [clojure.string :as string]
-   [goog.string :as s]
-   [cljs-time.core :as t]
-   [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-   [reagent.core :as r]
-   [ataru.component-data.module.module-spec :as module-spec]
-   [ataru.virkailija.editor.components.belongs-to-hakukohteet-component :as belongs-to-hakukohteet-component]
-   [ataru.virkailija.editor.components.component-content :as component-content]
-   [ataru.virkailija.editor.components.info-addon-component :as info-addon-component]
-   [ataru.virkailija.editor.components.input-fields-with-lang-component :as input-fields-with-lang-component]
-   [ataru.virkailija.editor.components.input-field-component :as input-field-component]
-   [ataru.virkailija.editor.components.markdown-help-component :as markdown-help-component]
-   [ataru.virkailija.editor.components.repeater-checkbox-component :as repeater-checkbox-component]
-   [ataru.virkailija.editor.components.text-component :as text-component]
-   [ataru.virkailija.editor.components.text-header-component :as text-header-component]
-   [ataru.virkailija.editor.components.validator-checkbox-component :as validator-checkbox-component]))
+    [ataru.application-common.application-field-common :refer [copy-link]]
+    [ataru.cljs-util :as util]
+    [ataru.koodisto.koodisto-whitelist :as koodisto-whitelist]
+    [ataru.virkailija.editor.components.followup-question :as followup-question]
+    [ataru.component-data.person-info-module :as pm]
+    [ataru.virkailija.editor.components.toolbar :as toolbar]
+    [ataru.virkailija.editor.components.drag-n-drop-spacer :as dnd]
+    [cljs.core.match :refer-macros [match]]
+    [clojure.string :as string]
+    [goog.string :as s]
+    [cljs-time.core :as t]
+    [re-frame.core :refer [subscribe dispatch dispatch-sync]]
+    [reagent.core :as r]
+    [ataru.component-data.module.module-spec :as module-spec]
+    [ataru.virkailija.editor.components.belongs-to-hakukohteet-component :as belongs-to-hakukohteet-component]
+    [ataru.virkailija.editor.components.component-content :as component-content]
+    [ataru.virkailija.editor.components.info-addon-component :as info-addon-component]
+    [ataru.virkailija.editor.components.input-fields-with-lang-component :as input-fields-with-lang-component]
+    [ataru.virkailija.editor.components.input-field-component :as input-field-component]
+    [ataru.virkailija.editor.components.markdown-help-component :as markdown-help-component]
+    [ataru.virkailija.editor.components.repeater-checkbox-component :as repeater-checkbox-component]
+    [ataru.virkailija.editor.components.text-component :as text-component]
+    [ataru.virkailija.editor.components.text-header-component :as text-header-component]
+    [ataru.virkailija.editor.components.validator-checkbox-component :as validator-checkbox-component]
+    [ataru.virkailija.editor.components.checkbox-component :as checkbox-component]))
 
 (defn- required-disabled [initial-content]
   (contains? (-> initial-content :validators set) "required-hakija"))
@@ -247,6 +248,8 @@
                :header? true)]
              [:div.editor-form__checkbox-wrapper
               [validator-checkbox-component/validator-checkbox path initial-content :required (required-disabled initial-content)]
+              (when (and (seq (:belongs-to-hakukohderyhma initial-content)) (and (nil? @options-koodisto) (not (string/includes? (str path) ":children"))))
+                [checkbox-component/checkbox path initial-content :per-hakukohde])
               (when @support-selection-limit?
                 [validator-checkbox-component/validator-checkbox path initial-content :selection-limit nil
                  #(dispatch [:editor/set-selection-group-id (when % @selected-form-key) path])])

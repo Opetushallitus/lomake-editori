@@ -1,9 +1,10 @@
 (ns ataru.hakija.application-hakukohde-handlers
   (:require
     [clojure.string :as string]
-    [re-frame.core :refer [subscribe reg-event-db reg-fx reg-event-fx dispatch]]
+    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [ataru.util :as util]
-    [ataru.hakija.application-validators :as validator]
+    [ataru.hakija.handlers-util :as handlers-util]
+    [ataru.application_common.comparators :as comparators]
     [ataru.hakija.application-handlers :refer [set-field-visibilities
                                                set-validator-processing
                                                check-schema-interceptor]]))
@@ -100,6 +101,20 @@
                                                                      valid?]))}}))
 
 (reg-event-fx
+  :application/create-questions-per-hakukohde
+  (fn [{db :db} [_ hakukohde-oid]]
+    (let [questions (get-in db [:form :content])
+          selected-hakukohteet (get-in db [:application :answers :hakukohteet :value])
+          update-questions (sort (comparators/duplikoitu-kysymys-hakukohde-comparator selected-hakukohteet)
+                            (reduce (partial handlers-util/duplicate-questions-for-hakukohde db hakukohde-oid) [] questions))
+          updated-answers (handlers-util/fill-missing-answer-for-hakukohde (get-in db [:application :answers]) update-questions)
+          flat-form-content (util/flatten-form-fields update-questions)]
+      {:db (-> db
+               (assoc-in [:form :content] update-questions)
+               (assoc-in [:application :answers] updated-answers)
+               (assoc :flat-form-content flat-form-content))})))
+
+(reg-event-fx
   :application/hakukohde-add-selection
   [check-schema-interceptor]
   (fn [{db :db} [_ hakukohde-oid]]
@@ -121,7 +136,34 @@
                                    (and (some? max-hakukohteet)
                                         (<= max-hakukohteet (count new-hakukohde-values)))
                                    (assoc-in [:application :show-hakukohde-search] false))
-       :dispatch [:application/validate-hakukohteet]})))
+       :dispatch-n [[:application/validate-hakukohteet] [:application/create-questions-per-hakukohde hakukohde-oid]]})))
+
+(defn- remove-question-duplicates-with-hakukohde
+  [hakukohde-oid questions]
+  (filter #(not= (:duplikoitu-kysymys-hakukohde-oid %) hakukohde-oid) questions))
+
+(defn- remove-duplicates-with-hakukohde
+  [m questions hakukohde-oid]
+  (let [duplicate-question-ids (->> questions
+                                    (filter #(= (:duplikoitu-kysymys-hakukohde-oid %) hakukohde-oid))
+                                    (map #(keyword (:id %))))]
+    (apply dissoc m duplicate-question-ids )))
+
+(reg-event-fx
+  :application/remove-questions-per-hakukohde
+  (fn [{db :db} [_ hakukohde-oid]]
+    (let [questions (get-in db [:form :content])
+          answers (get-in db [:application :answers])
+          ui (get-in db [:application :ui])
+          answers-without-duplicates (remove-duplicates-with-hakukohde answers questions hakukohde-oid)
+          ui-without-duplicates (remove-duplicates-with-hakukohde ui questions hakukohde-oid)
+          update-questions (remove-question-duplicates-with-hakukohde hakukohde-oid questions)
+          flat-form-content (util/flatten-form-fields update-questions)]
+      {:db (-> db
+               (assoc-in [:form :content] update-questions)
+               (assoc-in [:application :answers] answers-without-duplicates)
+               (assoc-in [:application :ui] ui-without-duplicates)
+               (assoc :flat-form-content flat-form-content))})))
 
 (defn- remove-hakukohde-from-deleting
   [hakukohteet hakukohde]
@@ -142,7 +184,7 @@
                                    (update-in [:application :ui :hakukohteet :deleting] remove-hakukohde-from-deleting hakukohde-oid)
                                    set-field-visibilities)]
       {:db                 db
-       :dispatch [:application/validate-hakukohteet]})))
+       :dispatch-n [[:application/validate-hakukohteet] [:application/remove-questions-per-hakukohde hakukohde-oid]]})))
 
 (reg-event-fx
   :application/hakukohde-remove-selection

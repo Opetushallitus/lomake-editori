@@ -242,6 +242,15 @@
                    first)]
     (util/non-blank-val (:label koodi) [lang :fi :sv :en])))
 
+(defn- convert-answer-with-options-to-human-readable
+  [value options lang]
+  (some (fn [option]
+          (when (= value (:value option))
+            (or (util/non-blank-val (:label option) [lang :fi :sv :en])
+                value)))
+        options)
+  )
+
 (defn- raw-values->human-readable-value [liiteri-cas-client field-descriptor {:keys [lang]} get-koodisto-options value]
   (let [lang (-> lang clojure.string/lower-case keyword)
         koodisto-source (:koodisto-source field-descriptor)
@@ -264,11 +273,7 @@
                                   [lang :fi :sv :en])))
           (and (not (= (:fieldType field-descriptor) "textField"))
                (not (empty? options)))
-          (some (fn [option]
-                  (when (= value (:value option))
-                    (or (util/non-blank-val (:label option) [lang :fi :sv :en])
-                        value)))
-                options)
+          (convert-answer-with-options-to-human-readable value options lang)
           :else
           value)))
 
@@ -299,7 +304,9 @@
       (writer 0 (:column meta-field) meta-value)))
   (doseq [answer (:answers application)]
     (let [answer-key             (:key answer)
-          field-descriptor       (get form-fields-by-key answer-key)
+          field-descriptor       (if (:duplikoitu-kysymys-hakukohde-oid answer)
+                                   (get form-fields-by-key (first (string/split answer-key #"_")))
+                                   (get form-fields-by-key answer-key))
           column                 (:column (first (filter #(= answer-key (:id %)) headers)))
           value-or-values        (get person (keyword answer-key) (:value answer))
           ->human-readable-value (partial raw-values->human-readable-value liiteri-cas-client field-descriptor application get-koodisto-options)
@@ -372,16 +379,35 @@
                                           id-match?)))))]
     (->> form-fields
          (filter should-include?)
+         (filter #(not (:per-hakukohde %)))
          (map #(vector (:id %) (pick-header form-fields-by-id %))))))
 
+(defn- duplicate-header-per-hakukohde
+  [form-fields answer application]
+  (let [field (first (filter #(= (:id %) (:original-question answer)) form-fields))
+        hakukohteet (:value (first (filter #(= (:key %) "hakukohteet") (:answers application))))
+        get-hakukohde-for-answer (fn [answer] (first (filter #(string/includes? % (:duplikoitu-kysymys-hakukohde-oid answer)) hakukohteet)))
+        remove-oid-from-hakukohde (fn [hakukohde] (-> hakukohde
+                                                      (string/reverse)
+                                                      (string/split #"\(" 2)
+                                                      (last)
+                                                      (string/reverse)))
+        label (str (util/non-blank-val (:label field) [:fi :sv :en]) "\n" (remove-oid-from-hakukohde (get-hakukohde-for-answer answer)))]
+    (vector (:key answer) label)))
+
+
 (defn- headers-from-applications
-  [form-fields-by-id skip-answers? applications]
+  [form-fields form-fields-by-id skip-answers? applications]
   (->> applications
-       (mapcat :answers)
+       (map-indexed (fn [index, application] (map #(assoc % :application-index index) (:answers application))))
+       (flatten)
        (remove #(or (contains? form-fields-by-id (:key %))
                     (and skip-answers?
                          (not (answer-to-always-include? (:key %))))))
-       (map #(vector (:key %) (util/non-blank-val (:label %) [:fi :sv :en])))))
+       (map (fn [answer] (if (:original-question answer)
+               (duplicate-header-per-hakukohde form-fields answer (nth applications (:application-index answer)))
+               (vector (:key answer) (util/non-blank-val (:label answer) [:fi :sv :en])))))
+       (distinct)))
 
 (defn- extract-headers
   [applications form form-field-belongs-to skip-answers? included-ids]
@@ -396,7 +422,8 @@
                                             skip-answers?
                                             included-ids
                                             form-field-belongs-to)
-                         (headers-from-applications form-fields-by-id
+                         (headers-from-applications form-fields
+                                                    form-fields-by-id
                                                     skip-answers?
                                                     applications)))))
 

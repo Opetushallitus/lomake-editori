@@ -977,14 +977,24 @@
          {:fieldClass "wrapperElement" :fieldType "adjacentfieldset"} [adjacent-text-fields field-descriptor idx]))
 
 (defn render-field [field-descriptor idx]
-  (when field-descriptor
-    (let [render-fn (case (:version field-descriptor)
-                      "generic" generic-component/render-generic-component
-                      "oppiaineen-arvosanat" arvosanat/render-arvosanat-component
-                      render-component)
+  (when (and field-descriptor (not (:duplikoitu-kysymys-hakukohde-oid field-descriptor)))
+    (let [version (:version field-descriptor)
+          render-fn (cond
+                      (= "generic" version) generic-component/render-generic-component
+                      (= "oppiaineen-arvosanat" version) arvosanat/render-arvosanat-component
+                      :else render-component)
           visible?  @(subscribe [:application/visible? (keyword (:id field-descriptor))])]
       (when visible?
         [render-fn
+         {:field-descriptor field-descriptor
+          :idx              idx
+          :render-field     render-field}]))))
+
+(defn render-duplicate-field [field-descriptor idx]
+  (when (and field-descriptor (:duplikoitu-kysymys-hakukohde-oid field-descriptor))
+    (let [visible?  @(subscribe [:application/visible? (keyword (:id field-descriptor))])]
+      (when visible?
+        [render-component
          {:field-descriptor field-descriptor
           :idx              idx
           :render-field     render-field}]))))
@@ -997,4 +1007,10 @@
                                  (for [field (:content form-data)
                                        :when @(subscribe [:application/visible? (keyword (:id field))])]
                                    ^{:key (:id field)}
-                                   [render-field field nil])))}))
+                                   (if (:per-hakukohde field)
+                                     [:div.per-question-wrapper
+                                        [form-field-label-component/form-field-label field (application-field/form-field-id field nil)]
+                                        (for [duplicate-field (filter #(= (:original-question %) (:id field)) (:content form-data))]
+                                          ^{:key (str "duplicate-" (:id duplicate-field))}
+                                          [render-duplicate-field duplicate-field nil])]
+                                     [render-field field nil]))))}))

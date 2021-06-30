@@ -1007,8 +1007,14 @@
   :editor/remove-from-belongs-to-hakukohderyhma
   (fn [db [_ path oid]]
     (let [content-path (conj (vec (current-form-content-path db path))
-                        :belongs-to-hakukohderyhma)]
+                        :belongs-to-hakukohderyhma)
+          per-hakukohde-path (conj (vec (current-form-content-path db path))
+                                   :per-hakukohde)]
       (-> db
+          (update-in per-hakukohde-path (fn [per-hakukohde]
+                                          (if (= (count (get-in db content-path)) 1)
+                                            false
+                                            (or per-hakukohde false))))
           (update-in content-path (fnil (comp vec #(disj % oid) set) []))
           (update-modified-by [(remove-option-path path)])))))
 

@@ -109,8 +109,9 @@
                              :label  label
                              :value  (or value "")
                              :values {:value (or value "")
-                                      :valid (or (some? value) (not required?))}}])
-
+                                      :valid (or (some? value)
+                                                    (or (not required?)
+                                                    (boolean (:per-hakukohde field))))}}])
             [{:id         id
               :fieldClass "formField"
               :fieldType  "singleChoice"
@@ -130,10 +131,12 @@
               :label      label}]
             (let [required? (some #(contains? required-validators %)
                                   (:validators field))]
-              [(keyword id) {:valid  (not required?)
+              [(keyword id) {:valid  (or (not required?)
+                                         (boolean (:per-hakukohde field)))
                              :value  nil
                              :values {:value nil
-                                      :valid (not required?)}
+                                      :valid (or (not required?)
+                                                 (boolean (:per-hakukohde field)))}
                              :label  label}])
 
             [{:id         id
@@ -151,12 +154,12 @@
               :fieldClass "formField"
               :fieldType  "multipleChoice"
               :label      label}]
-            [(keyword id) {:valid  (not (some #(contains? required-validators %)
-                                              (:validators field)))
-                           :value  []
-                           :values []
-                           :label  label}]
-
+            [(keyword id) {:valid  (or (not (some #(contains? required-validators %)
+                                             (:validators field)))
+                                  (boolean (:per-hakukohde field)))
+                      :value  []
+                      :values []
+                      :label  label}]
             [{:id         id
               :fieldClass "formField"
               :fieldType  "attachment"
@@ -243,20 +246,25 @@
                                                  (map #(count (:value %)))
                                                  (distinct)
                                                  (sort (comp - compare))
-                                                 (first))]
+                                                 (first))
+           original-question (:original-question field-descriptor)
+           duplikoitu-kysymys-hakukohde-oid (:duplikoitu-kysymys-hakukohde-oid field-descriptor)]
           :when
           (and (or (= :birth-date ans-key)
                    (= :gender ans-key)
                    (get-in ui [ans-key :visible?] true))
                (not (:exclude-from-answers field-descriptor)))]
-      {:key       (:id field-descriptor)
-       :value     (cond (#{"attachment"} (:fieldType field-descriptor))
-                        (sanitize-attachment-value value values question-group-highest-dimension)
+      (cond->
+        {:key       (:id field-descriptor)
+         :value     (cond (#{"attachment"} (:fieldType field-descriptor))
+                          (sanitize-attachment-value value values question-group-highest-dimension)
 
-                        :else
-                        (sanitize-value field-descriptor value question-group-highest-dimension))
-       :fieldType (:fieldType field-descriptor)
-       :label     (:label field-descriptor)})))
+                          :else
+                          (sanitize-value field-descriptor value question-group-highest-dimension))
+         :fieldType (:fieldType field-descriptor)
+         :label     (:label field-descriptor)}
+        (some? original-question) (assoc :original-question original-question)
+        (some? duplikoitu-kysymys-hakukohde-oid) (assoc :duplikoitu-kysymys-hakukohde-oid duplikoitu-kysymys-hakukohde-oid)))))
 
 (defn create-application-to-submit [application form lang strict-warnings-on-unchanged-edits?]
   (let [{secret :secret virkailija-secret :virkailija-secret} application]

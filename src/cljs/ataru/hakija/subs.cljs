@@ -441,6 +441,13 @@
     (get-in db [:application :hakukohde-hits])))
 
 (re-frame/reg-sub
+  :application/get-hakukohde
+  (fn [_ _]
+    [(re-frame/subscribe [:application/tarjonta-hakukohteet])])
+  (fn [[hakukohteet] [_ hakukohde-oid]]
+    (first (filter #(= (:oid %) hakukohde-oid) hakukohteet ))))
+
+(re-frame/reg-sub
   :application/hakukohde-selected?
   (fn [_ _]
     (re-frame/subscribe [:application/selected-hakukohteet]))

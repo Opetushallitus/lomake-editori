@@ -80,7 +80,8 @@
                                                                            (s/optional-key :belongs-to-hakukohderyhma) [s/Str]
                                                                            (s/optional-key :followups)       [(s/if (comp some? :children) (s/recursive #'WrapperElement) (s/recursive #'BasicElement))]}]
                         (s/optional-key :belongs-to-hakukohteet)         [s/Str]
-                        (s/optional-key :belongs-to-hakukohderyhma)      [s/Str]})
+                        (s/optional-key :belongs-to-hakukohderyhma)      [s/Str]
+                        (s/optional-key :per-hakukohde)                  s/Bool})
 
 (s/defschema BasicElement
   (s/conditional
@@ -316,6 +317,8 @@
   {:key                          s/Str
    :value                        Value
    :fieldType                    (apply s/enum form-fields)
+   (s/optional-key :duplikoitu-kysymys-hakukohde-oid) (s/maybe s/Str)
+   (s/optional-key :original-question) (s/maybe s/Str)
    (s/optional-key :cannot-view) s/Bool
    (s/optional-key :label)       (s/maybe (s/cond-pre
                                            localized-schema/LocalizedString

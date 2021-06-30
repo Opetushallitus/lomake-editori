@@ -15,6 +15,7 @@
             [ataru.hakija.try-selection :refer [try-selection]]
             [ataru.translations.translation-util :as translations]
             [cljs.core.match :refer-macros [match]]
+            [ataru.hakija.handlers-util :as handlers-util]
             [ataru.hakija.application :refer [create-initial-answers
                                               create-application-to-submit
                                               extract-wrapper-sections]]
@@ -274,6 +275,7 @@
 
 (defn- merge-value [answer field-descriptor value]
   (merge answer {:valid  (boolean (or (:valid answer)
+                                      (:per-hakukohde field-descriptor)
                                       (:cannot-edit field-descriptor)
                                       (is-answered? (sanitize-value field-descriptor value nil))))
                  :value  value
@@ -285,7 +287,8 @@
                                (mapv (fn [value] {:valid true :value value}) value)
                                :else
                                {:value value
-                                :valid true})}))
+                                :valid true})
+                 }))
 
 (defn- original-values->answers [db]
   (update-in db [:application :answers]
@@ -393,8 +396,10 @@
                                              (map :oid)))
         preselected-hakukohde-oids (->> db :application :preselected-hakukohde-oids
                                         (filter #(contains? valid-hakukohde-oids %)))
-        flat-form-content          (autil/flatten-form-fields (:content form))
         excluded-attachment-ids-when-yo-and-jyemp (hebem/non-yo-attachment-ids form)
+        questions                  (:content form)
+        questions-with-duplicates  (handlers-util/duplicate-questions-for-hakukohteet (get-in form [:tarjonta :hakukohteet]) (get-in db [:application :hakukohde]) questions)
+        flat-form-content          (autil/flatten-form-fields questions-with-duplicates)
         initial-answers            (create-initial-answers flat-form-content preselected-hakukohde-oids)]
     (-> db
         (update :form (fn [{:keys [selected-language]}]
@@ -405,6 +410,7 @@
         (assoc-in [:application :excluded-attachment-ids-when-yo-and-jyemp] excluded-attachment-ids-when-yo-and-jyemp)
         (assoc-in [:application :answers] initial-answers)
         (assoc-in [:application :show-hakukohde-search] false)
+        (assoc-in [:form :content] questions-with-duplicates)
         (assoc-in [:application :validators-processing] #{})
         (assoc :strict-warnings-on-unchanged-edits? hakuaika-on?)
         (assoc :wrapper-sections (extract-wrapper-sections form))

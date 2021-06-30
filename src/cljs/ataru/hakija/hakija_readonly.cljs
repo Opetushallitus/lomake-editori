@@ -12,7 +12,8 @@
             [cljs.core.match :refer-macros [match]]
             [ataru.application-common.application-field-common :as application-field]
             [ataru.application.option-visibility :as option-visibility]
-            [ataru.hakija.arvosanat.arvosanat-render :as arvosanat]))
+            [ataru.hakija.arvosanat.arvosanat-render :as arvosanat]
+            [ataru.hakija.components.hakukohde-details-component :refer [hakukohde-details-component]]))
 
 (declare field)
 
@@ -115,7 +116,17 @@
     ^{:key (str (:id child)
                 (when question-group-id
                   (str "-" question-group-id)))}
-    [field child application lang question-group-id]))
+    (if (:per-hakukohde child)
+      [:div.readonly__per-question-wrapper
+       [:div.application__form-field-label.application__form-field__original-question
+        (from-multi-lang (:label child) lang)]
+       (for [duplicate-field (filter #(= (:original-question %) (:id child)) children)]
+         ^{:key (str "duplicate-" (:id duplicate-field))}
+         [:section
+           [hakukohde-details-component duplicate-field]
+           [field duplicate-field application lang nil]])]
+      (when (not (:duplikoitu-kysymys-hakukohde-oid child))
+        [field child application lang question-group-id]))))
 
 (defn wrapper [_ _ _ _]
   (let [ui (subscribe [:state-query [:application :ui]])]

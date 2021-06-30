@@ -5,7 +5,7 @@
             [ataru.hakija.components.question-hakukohde-names-component :as hakukohde-names-component]
             [ataru.application-common.application-field-common :as application-field]
             [ataru.application-common.components.dropdown-component :as dropdown-component]
-            [re-frame.core :as re-frame]
+            [re-frame.core :as re-frame :refer [subscribe]]
             [schema.core :as s]
             [schema-tools.core :as st]
             [ataru.hakija.schema.render-field-schema :as render-field-schema]))

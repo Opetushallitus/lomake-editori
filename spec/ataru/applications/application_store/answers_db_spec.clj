@@ -61,7 +61,9 @@
 (defn- create-answer [with-properties]
   (merge {:key       (util/component-id)
           :value     ""
-          :fieldType "textField"}
+          :fieldType "textField"
+          :original-question nil
+          :duplikoitu-kysymys-hakukohde-oid nil}
          with-properties))
 
 (describe "get application answers:"
