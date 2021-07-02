@@ -376,10 +376,9 @@
                                         first
                                         :end)
         time-diff                  (if (some? server-date)
-                                     (- (if (some? server-date)
-                                          (->> (clojure.string/replace server-date " GMT" "")
-                                               (f/parse (f/formatter "EEE, dd MMM yyyy HH:mm:ss"))
-                                               to-long))
+                                     (- (->> (clojure.string/replace server-date " GMT" "")
+                                             (f/parse (f/formatter "EEE, dd MMM yyyy HH:mm:ss"))
+                                             to-long)
                                         (.getTime (js/Date.)))
                                      0)
         form                       (-> (languages->kwd form)
@@ -475,7 +474,8 @@
         {:db         (assoc db :selection-limited selection-limited)
          :dispatch-n [[:application/hakukohde-query-change (atom "")]
                       [:application/set-page-title]
-                      [:application/validate-hakukohteet]]}
+                      [:application/validate-hakukohteet]
+                      [:application/hide-form-sections-with-text-component-visibility-rules]]}
         (when selection-limited
           {:http {:method  :put
                   :url     (str "/hakemus/api/selection-limit?form-key=" (-> db :form :key))
@@ -750,6 +750,50 @@
                        (assoc-in [:application :answers id :errors] errors))
        :dispatch-n [[:application/set-validator-processed id]
                     [:application/run-rules (:rules field-descriptor)]]})))
+
+(reg-event-db
+  :application/hide-form-sections-with-text-component-visibility-rules
+  (fn [db _]
+    (let [section-ids-with-visibility-rules (->> db
+                                                 :form
+                                                 :content
+                                                 (filter #(-> % :section-visibility-conditions seq))
+                                                 (map #(-> % :section-visibility-conditions))
+                                                 flatten
+                                                 (map :section-name)
+                                                 set)]
+      (reduce
+        (fn [acc-db section-id]
+          (assoc-in acc-db [:application :ui (keyword section-id) :visible?] false))
+        db
+        section-ids-with-visibility-rules))))
+
+(defn- hide-sections-based-on-conditions [db value section-visibility-conditions]
+  (let [section-name->visibility-conditions (group-by :section-name section-visibility-conditions)
+        distinct-form-sections (keys section-name->visibility-conditions)
+        update-form-section-visibility (fn [db section-name]
+                                         (when section-name
+                                           (let [visibility-conditions (get section-name->visibility-conditions section-name)]
+                                             (assoc-in
+                                               db
+                                               [:application :ui (keyword section-name) :visible?]
+                                               (when (seq value)
+                                                 (not
+                                                   (some #(option-visibility/non-blank-answer-satisfies-condition? value %)
+                                                         visibility-conditions)))))))]
+    (reduce
+      update-form-section-visibility
+      db
+      distinct-form-sections)))
+
+(reg-event-fx
+  :application/set-application-text-field
+  (fn [{db :db} [_ field-descriptor value]]
+    (let [visibility-conditions (:section-visibility-conditions field-descriptor)]
+      {:db       (if (seq visibility-conditions)
+                   (hide-sections-based-on-conditions db value visibility-conditions)
+                   db)
+       :dispatch [:application/set-repeatable-application-field field-descriptor nil nil value]})))
 
 (reg-event-fx
   :application/set-repeatable-application-field

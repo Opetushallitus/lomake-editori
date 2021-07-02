@@ -260,7 +260,7 @@
    :no-hakukohde-search-hits                    {:fi "Ei hakutuloksia"
                                                  :en "No search results found"
                                                  :sv "Inga sökresultat"}
-   :not-applicable-for-hakukohteet              {:fi "Huomaathan, että pohjakoulutuksesi perusteella et ole halukelpoinen seuraaviin hakukohteisiin. Tarkista hakukelpoisuusvaatimukset hakukohteen valintaperusteista."
+   :not-applicable-for-hakukohteet              {:fi "Huomaathan, että pohjakoulutuksesi perusteella et ole hakukelpoinen seuraaviin hakukohteisiin. Tarkista hakukelpoisuusvaatimukset hakukohteen valintaperusteista."
                                                  :sv "Märk, att du på basis av din grundutbildning inte är behörig att söka till detta ansökningsmål. Kontrollera behörighetskraven för ansökan i ansökningsmålets antagningsgrunder."
                                                  :en "Please note that the education you have given does not provide eligibility for these study programmes. Please check the required eligibility from the study programme’s admission criteria."}
    :not-editable-application-period-ended       {:fi "Tämä hakutoive ei ole muokattavissa koska sen hakuaika on päättynyt."
@@ -1872,6 +1872,12 @@
    :lisakysymys-arvon-perusteella-lisaa-ehto        {:fi "Lisää ehto"
                                                      :sv "Lisää ehto"
                                                      :en "EN: Lisää ehto"}
+   :lomakeosion-piilottaminen-arvon-perusteella     {:fi "Toisen lomakeosion piilottaminen arvon perusteella"
+                                                     :sv "SV: Toisen lomakeosion piilottaminen arvon perusteella"
+                                                     :en "EN: Toisen lomakeosion piilottaminen arvon perusteella"}
+   :lomakeosion-piilottaminen-arvon-perusteella-valitse-osio {:fi "Valitse piilotettava osio tästä"
+                                                              :sv "SV: Valitse piilotettava osio tästä"
+                                                              :en "EN: Valitse piilotettava osio tästä"}
    :filter-by-question-answer                       {:fi "Rajaa vastauksen mukaan"
                                                      :sv "Avgränsa enligt svar"
                                                      :en "EN: Rajaa vastauksen mukaan"}

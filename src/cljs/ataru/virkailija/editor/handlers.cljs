@@ -104,10 +104,33 @@
           (update-in text-field-path into [component])
           (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
 
+(defn text-field-section-visibility-condition [section-name]
+  {:section-name section-name
+   :condition {:comparison-operator "<"}})
+
+(reg-event-db
+  :editor/lisää-tekstikentän-arvon-perusteella-osion-piilottamis-ehto
+  (fn [db [_ path]]
+    (let [text-field-path (current-form-content-path db [path :section-visibility-conditions])
+          hideable-form-sections @(subscribe [:editor/current-lomakeosiot])
+          default-hidden-section-name (-> hideable-form-sections first :id)
+          section-visibility (text-field-section-visibility-condition default-hidden-section-name)]
+      (-> db
+          (update-in text-field-path into [section-visibility])
+          (update-in (drop-last text-field-path) set-non-koodisto-option-values)))))
+
+(reg-event-db
+  :editor/lisää-tekstikentän-arvon-perusteella-piilotettavan-osion-nimi
+  (fn [db [_ path option-index value]]
+    (let [section-name-path (current-form-content-path db [path option-index :section-name])]
+      (assoc-in db
+                 section-name-path
+                 value))))
+
 (reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-operaattori
   (fn [db [_ path option-index value]]
-    (let [condition-path (current-form-content-path db [path :options option-index :condition])]
+    (let [condition-path (current-form-content-path db [path option-index :condition])]
       (update-in db
                  condition-path
                  (fn [condition]
@@ -116,7 +139,7 @@
 (reg-event-db
   :editor/aseta-lisäkysymys-arvon-perusteella-vertailuarvo
   (fn [db [_ path option-index value]]
-    (let [condition-path (current-form-content-path db [path :options option-index :condition])]
+    (let [condition-path (current-form-content-path db [path option-index :condition])]
       (update-in db
                  condition-path
                  (fn [condition]

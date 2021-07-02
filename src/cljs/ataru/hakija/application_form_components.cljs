@@ -40,6 +40,9 @@
 (defn- email-verify-field-change [field-descriptor value verify-value]
   (dispatch [:application/set-email-verify-field field-descriptor value verify-value]))
 
+(defn- text-field-change [field-descriptor value]
+  (dispatch [:application/set-application-text-field field-descriptor value]))
+
 (defn- textual-field-change [field-descriptor value]
   (dispatch [:application/set-repeatable-application-field field-descriptor nil nil value]))
 
@@ -215,7 +218,7 @@
             show-error?      @(subscribe [:application/show-validation-error-class? id idx nil])
             on-change        (if idx
                                (partial multi-value-field-change field-descriptor idx)
-                               (partial textual-field-change field-descriptor))
+                               (partial text-field-change field-descriptor))
             on-blur          (fn [_] (textual-field-blur field-descriptor))
             form-field-id    (application-field/form-field-id field-descriptor idx)
             data-test-id     (if (some #{id} [:first-name
