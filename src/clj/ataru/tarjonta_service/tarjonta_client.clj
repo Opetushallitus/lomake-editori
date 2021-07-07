@@ -84,6 +84,7 @@
           :ryhmaliitokset                                              (some->> (:ryhmaliitokset hakukohde)
                                                                                 (map :ryhmaOid)
                                                                                 (distinct))
+          :koulutustyypit                                              []
           :hakukelpoisuusvaatimus-uris                                 (:hakukelpoisuusvaatimusUris hakukohde)
           :ylioppilastutkinto-antaa-hakukelpoisuuden?                  (boolean (:ylioppilastutkintoAntaaHakukelpoisuuden hakukohde))
           :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja? (boolean (:josYoEiMuitaLiitepyyntoja hakukohde))}

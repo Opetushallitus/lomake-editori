@@ -467,6 +467,20 @@
     (set-limit-reached db (:body response))))
 
 (reg-event-fx
+  :application/set-initial-hakukohde-selection
+  (fn [{:keys [db]} _]
+    (let [kohdejoukko-uri (get-in db [:form :tarjonta :kohdejoukko-uri])
+          kohdejoukko (when (some? kohdejoukko-uri)
+                        (-> kohdejoukko-uri
+                            (string/split #"#")
+                            first))
+          yhteishaku? (get-in db [:form :tarjonta :yhteishaku])
+          is-toisen-asteen-yhteishaku (and yhteishaku?
+                                           (= kohdejoukko "haunkohdejoukko_11"))]
+      (when-not is-toisen-asteen-yhteishaku ;TODO devaamista varten, oikeasti when
+        {:dispatch [:application/add-empty-hakukohde-selection]}))))
+
+(reg-event-fx
   :application/post-handle-form-dispatches
   [check-schema-interceptor]
   (fn [{:keys [db]} _]
@@ -475,7 +489,9 @@
         {:db         (assoc db :selection-limited selection-limited)
          :dispatch-n [[:application/hakukohde-query-change (atom "")]
                       [:application/set-page-title]
-                      [:application/validate-hakukohteet]]}
+                      [:application/set-initial-hakukohde-selection]
+                      [:application/validate-hakukohteet]
+                      [:application/fetch-koulutustyypit]]}
         (when selection-limited
           {:http {:method  :put
                   :url     (str "/hakemus/api/selection-limit?form-key=" (-> db :form :key))

@@ -110,6 +110,9 @@
    :check-answers                               {:fi ["Tarkista " " tietoa"]
                                                  :sv ["Kontrollera " " uppgifter"]
                                                  :en ["Check " " answers"]}
+   :choose-n-hakukohde-at-most                  {:fi ["Valitse entintään " " hakukohdetta"]
+                                                 :sv ["Välj upp till " " ansökningsmål"]
+                                                 :en ["Choose " " hakukohde at most"]}
    :contact-language                            {:fi "Asiointikieli"
                                                  :sv "Ärendespråk"
                                                  :en "Contact language"}
@@ -200,6 +203,9 @@
    :file-upload-error                           {:fi "Tiedostoa ei ladattu, yritä uudelleen"
                                                  :en "File failed to upload, try again"
                                                  :sv "Filen kunde inte laddas, försök igen"}
+   :filter-with-koulutustyypit                  {:fi "Rajaa koulutustyypeillä"
+                                                 :sv "Filtera med typ av utbildning"
+                                                 :en "Filter with education type"}
    :cancel-remove                               {:fi "Älä poista"
                                                  :sv "Radera inte"
                                                  :en "Don't remove"}
@@ -350,6 +356,9 @@
    :read-less                                   {:fi "Sulje ohje"
                                                  :sv "Dölj anvisning"
                                                  :en "Hide instructions"}
+   :read-further-info                           {:fi "Lue lisätietoa"
+                                                 :sv "Läs mer info"
+                                                 :en "Read further info"}
    :read-more                                   {:fi "Lue lisää"
                                                  :sv "Läs mer"
                                                  :en "Read more"}
@@ -362,6 +371,9 @@
    :search-application-options                  {:fi "Etsi tämän haun koulutuksia"
                                                  :sv "Hämta ansökningsmål i denna ansökan"
                                                  :en "Search for study programmes"}
+   :search-for-hakukohde                        {:fi "Hae koulutusta tai oppilaitosta"
+                                                 :sv "Hämta ansökningsmål"
+                                                 :en "Search for education or study programme"}
    :second                                      {:fi "sekunti"
                                                  :en "second"
                                                  :sv "sekund"}

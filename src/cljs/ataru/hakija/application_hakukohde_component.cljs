@@ -4,7 +4,8 @@
     [ataru.application-common.application-field-common :refer [scroll-to-anchor]]
     [ataru.util :as util]
     [ataru.translations.translation-util :as translations]
-    [reagent.core :as r]))
+    [reagent.core :as r]
+    [ataru.hakija.application-hakukohde-2nd-component :as hakukohde-2nd]))
 
 (defn hilighted-text->span [idx {:keys [text hilight]}]
   [(if hilight
@@ -58,6 +59,7 @@
                   #(dispatch [:application/change-hakukohde-priority hakukohde-oid 1]))}]))
 
 (defn- prioritize-hakukohde-buttons
+  ;; TODO: Katso missä käytössä
   [hakukohde-oid disabled?]
   (let [priority-number @(subscribe [:application/hakukohde-priority-number hakukohde-oid])]
     [:div.application__selected-hakukohde-row--priority-changer
@@ -237,3 +239,10 @@
      [select-new-hakukohde-row]
      (when @(subscribe [:application/show-hakukohde-search])
        [hakukohde-selection-search])]]])
+
+(defn hakukohteet-picker
+  [field-descriptor idx]
+  (let [toisen-asteen-yhteishaku @(subscribe [:application/toisen-asteen-yhteishaku?])]
+    (if-not toisen-asteen-yhteishaku                        ;TODO devaamista varten, oikeasti if
+      [hakukohde-2nd/hakukohteet field-descriptor idx]
+      [hakukohteet field-descriptor idx])))

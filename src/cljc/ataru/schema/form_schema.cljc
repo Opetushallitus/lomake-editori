@@ -50,6 +50,7 @@
                         :metadata                                        element-metadata-schema/ElementMetadata
                         (s/optional-key :cannot-view)                    s/Bool
                         (s/optional-key :cannot-edit)                    s/Bool
+                        (s/optional-key :per-hakukohde)                  s/Bool
                         (s/optional-key :validators)                     [validator-schema/Validator]
                         (s/optional-key :rules)                          {s/Keyword s/Any}
                         (s/optional-key :blur-rules)                     {s/Keyword s/Any}
@@ -191,6 +192,7 @@
    :hakukohderyhmat                                                              [s/Str]
    :hakuaika                                                                     Hakuaika
    :koulutukset                                                                  [Koulutus]
+   (s/optional-key :koulutustyypit)                                              [s/Str]
    :applicable-base-educations                                                   [s/Str]
    ;; jyemp
    (s/optional-key :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja?) s/Bool})
@@ -203,6 +205,7 @@
    :prioritize-hakukohteet             s/Bool
    :max-hakukohteet                    (s/maybe s/Int)
    :can-submit-multiple-applications   s/Bool
+   :kohdejoukko-uri                    s/Str
    :yhteishaku                         (s/maybe s/Bool)})
 
 (s/defschema Haku
@@ -243,6 +246,7 @@
    (s/optional-key :hakuaika-id)                                                 s/Str
    (s/optional-key :hakuajat)                                                    [{:start                org.joda.time.DateTime
                                                                                    (s/optional-key :end) org.joda.time.DateTime}]
+   :koulutustyypit                                                               [s/Str]
    :hakukelpoisuusvaatimus-uris                                                  [s/Str]
    :ylioppilastutkinto-antaa-hakukelpoisuuden?                                   s/Bool
    ;; jyemp

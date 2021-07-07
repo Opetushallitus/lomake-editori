@@ -78,7 +78,7 @@
 (defn- parse-hakukohde
   [hakukohde tarjoajat hakukohderyhmas]
   (merge
-   {:oid                                                         (:oid hakukohde)
+   {:oid                                                         (str (:oid hakukohde) ".xyz")
     :hakukohteen-tiedot-url                                      (url-helper/resolve-url :kouta-app.hakukohde (:oid hakukohde))
     :can-be-applied-to?                                          (parse-can-be-applied-to? hakukohde)
     :haku-oid                                                    (:hakuOid hakukohde)
@@ -89,6 +89,7 @@
     :ryhmaliitokset                                              hakukohderyhmas
     :hakukelpoisuusvaatimus-uris                                 (:pohjakoulutusvaatimusKoodiUrit hakukohde)
     :ylioppilastutkinto-antaa-hakukelpoisuuden?                  false
+    :koulutustyypit                                              (:koulutustyypit hakukohde)
     :jos-ylioppilastutkinto-ei-muita-pohjakoulutusliitepyyntoja? false}
    (if (:kaytetaanHaunAikataulua hakukohde)
      {:hakuaika-id "kouta-hakuaika-id"}

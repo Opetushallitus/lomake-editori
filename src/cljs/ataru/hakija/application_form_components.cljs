@@ -12,6 +12,7 @@
               belongs-to-hakukohde-or-ryhma?]]
             [ataru.application.option-visibility :as option-visibility]
             [ataru.hakija.application-hakukohde-component :as hakukohde]
+            [ataru.hakija.application-hakukohde-2nd-component :as hakukohde-2nd]
             [ataru.hakija.pohjakoulutusristiriita :as pohjakoulutusristiriita]
             [ataru.util :as util]
             [reagent.core :as r]
@@ -971,7 +972,7 @@
          {:fieldClass "formField" :fieldType "multipleChoice"} [multiple-choice field-descriptor idx]
          {:fieldClass "formField" :fieldType "singleChoice"} [single-choice-button field-descriptor idx]
          {:fieldClass "formField" :fieldType "attachment"} [attachment field-descriptor idx]
-         {:fieldClass "formField" :fieldType "hakukohteet"} [hakukohde/hakukohteet field-descriptor idx]
+         {:fieldClass "formField" :fieldType "hakukohteet"} [hakukohde/hakukohteet-picker field-descriptor idx]
          {:fieldClass "pohjakoulutusristiriita" :fieldType "pohjakoulutusristiriita"} [pohjakoulutusristiriita/pohjakoulutusristiriita field-descriptor idx]
          {:fieldClass "infoElement"} [info-element field-descriptor idx]
          {:fieldClass "wrapperElement" :fieldType "adjacentfieldset"} [adjacent-text-fields field-descriptor idx]))

@@ -128,6 +128,34 @@
     (util/group-by-first :oid hakukohteet)))
 
 (re-frame/reg-sub
+  :application/tarjonta-hakukohde-by-oid
+  (fn [_ _]
+    (re-frame/subscribe [:application/tarjonta-hakukohteet-by-oid]))
+  (fn [hakukohteet [_ hakukohde-oid]]
+    (get hakukohteet hakukohde-oid)))
+
+
+(re-frame/reg-sub
+  :application/hakukohde-name-label-by-oid
+  (fn [[_ hakukohde-oid]]
+    [(re-frame/subscribe [:application/tarjonta-hakukohde-by-oid hakukohde-oid])
+     (re-frame/subscribe [:application/default-languages])])
+  (fn [[hakukohde default-languages] _]
+    (util/non-blank-val
+      (:name hakukohde)
+      default-languages)))
+
+(re-frame/reg-sub
+  :application/hakukohde-tarjoaja-name-label-by-oid
+  (fn [[_ hakukohde-oid]]
+    [(re-frame/subscribe [:application/tarjonta-hakukohde-by-oid hakukohde-oid])
+     (re-frame/subscribe [:application/default-languages])])
+  (fn [[hakukohde default-languages] _]
+    (util/non-blank-val
+      (:tarjoaja-name hakukohde)
+      default-languages)))
+
+(re-frame/reg-sub
   :application/attachment-deadline
   (fn [_ _]
     (re-frame/subscribe [:application/selected-language]))
@@ -455,9 +483,9 @@
 (re-frame/reg-sub
   :application/max-hakukohteet
   (fn [db _]
-    (get-in (hakukohteet-field db)
-            [:params :max-hakukohteet]
-            nil)))
+    (-> (hakukohteet-field db)
+        (get-in [:params :max-hakukohteet])
+        (or 3))))
 
 (re-frame/reg-sub
   :application/rajaavat-hakukohderyhmat
@@ -634,3 +662,60 @@
       (let [changed? (fn [answer] (or (not= (:original-value answer) (:value answer))
                                       (some? (some #(= :deleting (:status %)) (:values answer)))))]
            (some? (some changed? (vals answers))))))
+
+(re-frame/reg-sub
+  :application/active-hakukohde-search
+  (fn [db _]
+    (get-in db [:application :active-hakukohde-search])))
+
+(re-frame/reg-sub
+  :application/koulutustyypit
+  (fn [db _]
+    (get-in db [:application :koulutustyypit])))
+
+(re-frame/reg-sub
+  :application/hakukohde-koulutustyypit-filters
+  (fn [db [_ idx]]
+    (get-in db [:application :hakukohde-koulutustyyppi-filters idx])))
+
+(re-frame/reg-sub
+  :application/active-koulutustyyppi-filters
+  (fn [db [_ idx]]
+    (->> (get-in db [:application :hakukohde-koulutustyyppi-filters idx])
+         (keep (fn [[key value]] (when value key)))
+         set)))
+
+(re-frame/reg-sub
+  :application/koulutustyyppi-filtered-hakukohde-hits
+  (fn [[_ idx] _]
+    [(re-frame/subscribe [:application/active-koulutustyyppi-filters idx])
+     (re-frame/subscribe [:application/hakukohde-hits])
+     (re-frame/subscribe [:application/tarjonta-hakukohteet])
+     (re-frame/subscribe [:application/selected-hakukohteet])
+     (re-frame/subscribe [:application/virkailija?])])
+  (fn [[active-koulutustyyppi-filters hakukohde-hits hakukohteet selected-hakukohteet virkailija]]
+    (let [hit-filter (fn [{oid :oid}] ((set hakukohde-hits) oid))
+          koulutustyyppi-filter (fn [{koulutustyypit :koulutustyypit}]
+                                  (or (empty? active-koulutustyyppi-filters)
+                                      (some active-koulutustyyppi-filters koulutustyypit)))
+          selected-filter (fn [{oid :oid}] ((set selected-hakukohteet) oid))
+          hakuaika-filter (fn [hakukohde]
+                            (or virkailija (get-in hakukohde [:hakuaika :on])))]
+      (->> hakukohteet
+           (filter hit-filter)
+           (remove selected-filter)
+           (filter koulutustyyppi-filter)
+           (filter hakuaika-filter)
+           (map :oid)))))
+
+(re-frame/reg-sub
+  :application/toisen-asteen-yhteishaku?
+  (fn [db]
+    (let [kohdejoukko-uri (get-in db [:form :tarjonta :kohdejoukko-uri])
+          kohdejoukko (when (some? kohdejoukko-uri)
+                        (-> kohdejoukko-uri
+                            (cstr/split #"#")
+                            first))
+          yhteishaku? (get-in db [:form :tarjonta :yhteishaku])]
+      (and yhteishaku?
+           (= kohdejoukko "haunkohdejoukko_11")))))

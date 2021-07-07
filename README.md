@@ -184,6 +184,11 @@ Swagger specs for the APIs can be found at
 * <http://localhost:8351/hakemus/swagger.json>
 * <http://localhost:8350/lomake-editori/swagger.json>
 
+Swagger UI can be found at 
+
+* <http://localhost:8351/hakemus/api-docs/index.html>
+* <http://localhost:8350/lomake-editori/api-docs/index.html>
+
 ## Anonymize data
 
 Before transfering data between environments one can anonymize the data by running
