@@ -1017,18 +1017,28 @@
   justify-content: center;
   width: 43px;
   margin-left: -43px;
-  z-index: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.editor-form__select-koodisto-dropdown--regular {
+  border: 0;
+  background-color: rgba(1, 1, 1, 0);
+  z-index: 0;
+}
+.editor-form__select-koodisto-dropdown--invalid {
+  border: 1px solid #e09191;
+  background-color: #ffe9e9;
+  z-index: 0;
 }
 
 .editor-form__select-koodisto-dropdown {
-  border: 0;
   padding-left: 10px;
   padding-right: 43px;
-  background-color: rgba(1, 1, 1, 0);
+  z-index: 2;
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
-  z-index: 2;
 }
 
 .editor-form__header-wrapper {

@@ -139,6 +139,9 @@
        [:div.editor-form__select-koodisto-dropdown-wrapper
         [:select.editor-form__select-koodisto-dropdown
          {:id        id
+          :class     (if (string/blank? (:uri @selected-koodisto))
+                       "editor-form__select-koodisto-dropdown--invalid"
+                       "editor-form__select-koodisto-dropdown--regular")
           :value     (:uri @selected-koodisto)
           :on-change #(dispatch [:editor/select-koodisto-options (.-value (.-target %)) path (:allow-invalid? @selected-koodisto)])
           :data-test-id "editor-form__select-koodisto-dropdown"}

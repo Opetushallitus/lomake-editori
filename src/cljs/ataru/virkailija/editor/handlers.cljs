@@ -643,8 +643,19 @@
                        (if (= (:key snapshot) (:key form))
                          snapshot
                          original-form))
+            invalid-koodisto (fn [component]
+                               (if-let [uri (-> component
+                                                :koodisto-source
+                                                :uri)]
+                                 (string/blank? uri)
+                                 false))
+            omit-invalid (fn [component]
+                           (if (vector? component)
+                             (vec (remove invalid-koodisto component))
+                             component))
             form     (-> form
-                         (dissoc :created-time))]
+                         (dissoc :created-time)
+                         (update :content #(walk/postwalk omit-invalid %)))]
         (when (not-empty (:content form))
           (try
             (if-let [fragments (seq (form-diff/as-operations snapshot form))]
